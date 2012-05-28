@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/css/smoothness/jquery-ui-1.8.17.custom.css" >
+<link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/datatables/css/demo_table_jui.css" >
+<title>Stop-Park</title>
+<style>
+/*.del {
+ display: inline-block;
+ width: 15px;
+ height: 15px;
+ background-image: url(http://${host}/stoppark/ui/img/delete-icon.png);
+ background-size: contain;
+ background-repeat:no-repeat;
+}*/
+
+.del {
+  font-size: 1.45em;
+  font-weight: italic;
+  color: red;
+}
+
+#tabs {
+ clear: both;
+ border: none;
+ padding: 0;
+ margin: 0;
+}
+
+body {
+  padding: 0px;
+  margin: 0px; 
+}
+
+* {
+ font-size:  13px;
+ font-family: Verdana,Arial,sans-serif;
+}
+
+table * {
+  font-size: 11px;
+}
+
+#status * {
+  font-size: 14px;
+}
+
+#user {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	z-index: 1000;
+}
+
+</style>
+
+</head>
+<body>
+
+<div id="user"><span id="userlevel">${level}</span>: ${user} [<a href="http://logout@${host}:2000/auth">Выход</a>]</div>
+
+<div>
+<table id="status" cellpadding="0" cellspacing="0" border="0" class="display" style="margin-bottom: 10px">
+  <thead>
+   <tr>
+    <th colspan="19" style="background-color: #CCC">Парковка</th>
+   </tr>
+   <tr>
+    <th colspan="5" style="background-color: #EEE">Вьезд</th>
+    <th colspan="5" style="background-color: #DDD">Выезд</th>
+    <th colspan="5" style="background-color: #EEE">Оплачено</th>
+    <th colspan="2" style="background-color: #DDD">Виды оплаты</th>
+    <th colspan="2" style="background-color: #EEE">Места</th>
+   </tr>
+   <tr>
+    <th>∑</th> 
+    <th>Год</th> 
+    <th>Месяц</th> 
+    <th>День</th> 
+    <th>Смена</th> 
+    <th>∑</th> 
+    <th>Год</th> 
+    <th>Месяц</th> 
+    <th>День</th> 
+    <th>Смена</th> 
+    <th>∑</th> 
+    <th>Год</th> 
+    <th>Месяц</th> 
+    <th>День</th> 
+    <th>Смена</th> 
+    <th>Post</th>
+    <th>Single</th>
+    <th>Свободно</th>
+    <th>Всего</th>
+   </tr>
+  </thead>
+</table>
+</div>
+
+<div id="tabs">
+
+<ul>
+  <li><a href="#tab-boards">Пульты</a></li>
+  <li><a href="#tab-events">События</a></li>
+  <li><a href="#tab-payment">Платежи</a></li>
+  <li><a href="#tab-cards">Карточки</a></li>
+  <li><a href="#tab-tickets">Талоны</a></li>
+  <li><a href="#tab-tariffs">Тарифы</a></li>
+  <li><a href="#tab-config">Конфигурация</a></li>
+  <li><a href="#tab-reports">Отчёты</a></li>
+</ul>
+
+<div id="tab-boards">
+ <table id="boards" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th>HKol</th>     
+   <th>HSum</th>     
+   <th>DKol</th>     
+   <th>DSum</th>     
+   <th>MKol</th>     
+   <th>MSum</th>     
+   <th>StKol</th>     
+   <th>StSum</th>     
+   <th>Time</th>     
+   <th>ParkManLast</th>     
+   <th>ParkManCur</th>     
+   <th>PrintedAll</th>     
+   <th>PrintedSmena</th>     
+  </tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table> 
+
+</div>
+
+<div id="tab-events">
+ <table id="events" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th>Событие</th>     
+   <th>Время</th>     
+   <th>Терминал</th>     
+   <th>Направление</th>     
+   <th>Основание</th>     
+   <th>Мест</th>     
+  </tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table> 
+
+</div>
+
+<div id="tab-payment">
+ <table id="payment" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th>Оплата</th>
+   <th>Касса</th>
+   <th>Оператор</th>
+   <th>Время</th>
+   <th>Тип</th>
+   <th>Талон</th>
+   <th>Статус</th>
+   <th>Тариф</th>
+   <th>Период</th>
+   <th>Сумма</th>
+  </tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table> 
+
+</div>
+
+<div id="tab-cards">
+
+<table id="cards" cellpadding="1" cellspacing="0" border="0" class="display small-font">
+<thead>
+  <tr>
+   <th>#</th>          
+   <th>Тип</th>          
+   <th>ID</th>     
+   <th>От</th>     
+   <th>До</th>     
+   <th>Имя</th>     
+   <th>Отчество</th>     
+   <th>Фамилия</th>     
+   <th>Телефон</th>     
+   <th>Госномер</th>     
+   <th>Марка</th>     
+   <th>Цвет</th>     
+   <th>Статус</th>     
+   <th>Тариф</th>     
+   <th>Цена</th>     
+   <th>Сумма</th>     
+  </tr>
+</thead>
+
+<tfoot>
+  <tr>
+   <th>#</th>          
+   <th>Тип</th>          
+   <th>ID</th>     
+   <th>Рег.</th>     
+   <th>Действ.</th>     
+   <th>Имя</th>     
+   <th>Отчество</th>     
+   <th>Фамилия</th>     
+   <th>Телефон</th>     
+   <th>Госномер</th>     
+   <th>Марка</th>     
+   <th>Цвет</th>     
+   <th>Статус</th>     
+   <th>Тариф</th>     
+   <th>Цена</th>     
+   <th>Сумма</th>     
+  </tr>
+</tfoot>
+
+<tbody></tbody>
+</table>
+
+<div style="clear:both">
+  <button id="cards-row-add">Добавить карточку</button>
+  <button id="cards-save-changes">Подтвердить изменения</button>
+  <button id="cards-cancel-changes">Отменить изменения</button>
+</div>
+
+</div>
+
+<div id="tab-tickets">
+ <table id="tickets" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th>id</th>     
+   <th>BAR</th>     
+   <th>TypeTarif</th>     
+   <th>PriceTarif</th>     
+   <th>Summ</th>     
+   <th>SummDopl</th>     
+   <th>TimeIn</th>     
+   <th>TimeOut</th>     
+   <th>TimeCount</th>     
+   <th>TimeDopl</th>     
+   <th>Status</th>     
+  </tr>
+ </thead>
+ <tbody>
+ </tbody>
+</table> 
+
+<div style="clear:both; display: none">
+  <button id="tickets-row-add">Добавить талон</button>
+  <button id="tickets-save-changes">Подтвердить изменения</button>
+  <button id="tickets-cancel-changes">Отменить изменения</button>
+</div>
+
+</div>
+
+<div id="tab-tariffs">
+ <table id="tariffs" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th>#</th>     
+   <th>Тариф</th>     
+   <th>Тип</th>     
+   <th>Интервал</th>     
+   <th>Стоимость</th>
+   <th>Расчетное время</th>          
+   <th>Максимум за 24 часа</th>  
+   <th>Примечание</th>     
+  </tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table> 
+
+<div style="clear:both">
+  <button id="tariffs-row-add">Добавить тариф</button>
+  <button id="tariffs-save-changes">Подтвердить изменения</button>
+  <button id="tariffs-cancel-changes">Отменить изменения</button>
+</div>
+
+</div>
+
+<div id="tab-config">
+ <table id="config" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th style="width:200px">Параметр</th>
+   <th>Значение</th>
+ </tr>
+ </thead>
+ <tbody>
+ </tbody>
+</table> 
+
+<div style="clear:both">
+  <button id="config-save-changes">Подтвердить изменения</button>
+  <button id="config-cancel-changes">Отменить изменения</button>
+</div>
+
+</div>
+
+<div id="tab-reports" style="padding-left: 20px">
+  <h3><a href="http://${host}/stoppark/data/db.db3">Выгрузить базу данных парковки</a></h3>
+</div>
+
+</div>
+
+<div id="dialog-confirm" title="Требуется подтверждение" style="display:none">
+	<p>
+   <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+   <span id="dialog-confirm-message"></span>
+  </p>
+</div>
+
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/js/jquery-1.7.1.min.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/js/jquery.tmpl.min.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/js/jquery-ui-1.8.17.custom.min.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/js/jquery.ui.datepicker-ru.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/datatables/js/jquery.dataTables.min.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/datatables/js/jquery.dataTables.fnReloadAjax.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/js/jquery.jeditable.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/js/jquery.jeditable.datepicker.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/js/jquery.jeditable.timepicker.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/js/jquery.jeditable.costpicker.js" ></script>
+<script type="text/javascript" charset="utf-8" src="http://${host}/stoppark/ui/js/stoppark.js" ></script>
+
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Stop-Park</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<link href="http://${host}/assets/css/bootstrap.min.css" rel="stylesheet" >
+<style type="text/css">
+      body {
+        padding-top: 43px;
+        padding-bottom: 40px;
+				margin: 0px;
+				font-size: 11px;
+      }
+</style>
+
+<link href="http://${host}/assets/css/bootstrap-responsive.css" rel="stylesheet" >
+
+<link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/css/smoothness/jquery-ui-1.8.17.custom.css" >
+<link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/datatables/css/demo_table_jui.css" >
+
+<style>
+.del {
+ display: inline-block;
+ width: 15px;
+ height: 15px;
+ background-image: url(http://${host}/ui/img/delete-icon.png);
+ background-size: contain;
+ background-repeat:no-repeat;
+}
+
+#tabs {
+ clear: both;
+ border: none;
+ padding: 0;
+ margin: 0;
+}
+
+
+#status * {
+  font-size: 14px;
+}
+
+
+</style>
+
+</head>
+<body>
+
+<div class="navbar navbar-fixed-top">
+ <div class="navbar-inner">
+  <div class="container">
+   <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+   </a>
+   <a class="brand" href="#">STOP-PARK</a>
+   <div class="nav-collapse">
+    <ul class="nav">
+     <li class="active"><a href="#">Server</a></li>
+<!--     <li><a href="#about">About</a></li>
+     <li><a href="#contact">Contact</a></li>-->
+    </ul>
+   </div><!--/.nav-collapse -->
+  </div>
+ </div>
+</div>
+
+
+
+<table id="status" cellpadding="0" cellspacing="0" border="0" class="display" style="border-radius: 10px">
+  <thead>
+   <tr>
+    <th colspan="19" style="background-color: #CCC">Парковка</th>
+   </tr>
+   <tr>
+    <th colspan="5" style="background-color: #EEE">Вьезд</th>
+    <th colspan="5" style="background-color: #DDD">Выезд</th>
+    <th colspan="5" style="background-color: #EEE">Оплачено</th>
+    <th colspan="2" style="background-color: #DDD">Виды оплаты</th>
+    <th colspan="2" style="background-color: #EEE">Места</th>
+   </tr>
+   <tr>
+    <th>∑</th> 
+    <th>Год</th> 
+    <th>Месяц</th> 
+    <th>День</th> 
+    <th>Смена</th> 
+    <th>∑</th> 
+    <th>Год</th> 
+    <th>Месяц</th> 
+    <th>День</th> 
+    <th>Смена</th> 
+    <th>∑</th> 
+    <th>Год</th> 
+    <th>Месяц</th> 
+    <th>День</th> 
+    <th>Смена</th> 
+    <th>Post</th>
+    <th>Single</th>
+    <th>Свободно</th>
+    <th>Всего</th>
+   </tr>
+  </thead>
+</table>
+
+<div id="tabs">
+
+<ul>
+  <li><a href="#tab-boards">Пульты</a></li>
+  <li><a href="#tab-cards">Карточки</a></li>
+  <li><a href="#tab-tickets">Талоны</a></li>
+  <li><a href="#tab-config">Конфигурация</a></li>
+</ul>
+
+<div id="tab-boards">
+ <table id="boards" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th>HKol</th>     
+   <th>HSum</th>     
+   <th>DKol</th>     
+   <th>DSum</th>     
+   <th>MKol</th>     
+   <th>MSum</th>     
+   <th>StKol</th>     
+   <th>StSum</th>     
+   <th>Time</th>     
+   <th>ParkManLast</th>     
+   <th>ParkManCur</th>     
+   <th>PrintedAll</th>     
+   <th>PrintedSmena</th>     
+  </tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table> 
+
+</div>
+
+<div id="tab-cards">
+
+<table id="cards" cellpadding="1" cellspacing="0" border="0" class="display small-font">
+<thead>
+  <tr>
+   <th>#</th>          
+   <th>Тип</th>          
+   <th>ID</th>     
+   <th>От</th>     
+   <th>До</th>     
+   <th>Имя</th>     
+   <th>Отчество</th>     
+   <th>Фамилия</th>     
+   <th>Телефон</th>     
+   <th>Госномер</th>     
+   <th>Марка</th>     
+   <th>Цвет</th>     
+   <th>Статус</th>     
+   <th>Тариф</th>     
+   <th>Цена</th>     
+   <th>Сумма</th>     
+  </tr>
+</thead>
+
+<tfoot>
+  <tr>
+   <th>#</th>          
+   <th>Тип</th>          
+   <th>ID</th>     
+   <th>Рег.</th>     
+   <th>Действ.</th>     
+   <th>Имя</th>     
+   <th>Отчество</th>     
+   <th>Фамилия</th>     
+   <th>Телефон</th>     
+   <th>Госномер</th>     
+   <th>Марка</th>     
+   <th>Цвет</th>     
+   <th>Статус</th>     
+   <th>Тариф</th>     
+   <th>Цена</th>     
+   <th>Сумма</th>     
+  </tr>
+</tfoot>
+
+<tbody></tbody>
+</table>
+
+<div style="clear:both">
+  <button id="cards-row-add">Добавить карточку </button>
+  <button id="cards-save-changes">Сохранить все изменения</button>
+  <button id="cards-cancel-changes">Отменить все изменения</button>
+</div>
+
+</div>
+
+<div id="tab-tickets">
+ <table id="tickets" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th>id</th>     
+   <th>BAR</th>     
+   <th>TypeTarif</th>     
+   <th>PriceTarif</th>     
+   <th>Summ</th>     
+   <th>SummDopl</th>     
+   <th>TimeIn</th>     
+   <th>TimeOut</th>     
+   <th>TimeCount</th>     
+   <th>TimeDopl</th>     
+   <th>Status</th>     
+  </tr>
+ </thead>
+ <tbody>
+ </tbody>
+</table> 
+
+<div style="clear:both">
+  <button id="tickets-row-add">Добавить талон</button>
+  <button id="tickets-save-changes">Сохранить все изменения</button>
+  <button id="tickets-cancel-changes">Отменить все изменения</button>
+</div>
+
+</div>
+
+<div id="tab-config">
+ <table id="config" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th style="width:200px">Параметр</th>
+   <th>Значение</th>
+ </tr>
+ </thead>
+ <tbody>
+ </tbody>
+ </table> 
+
+<div style="clear:both">
+  <button id="config-save-changes">Сохранить все изменения</button>
+  <button id="config-cancel-changes">Отменить все изменения</button>
+</div>
+
+</div>
+
+</div>
+
+
+<div id="dialog-confirm" title="Требуется подтверждение" style="display:none">
+	<p>
+   <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+   <span id="dialog-confirm-message"></span>
+  </p>
+</div>
+
+
+<script src="http://${host}/stoppark/ui/js/jquery-1.7.1.min.js" ></script>
+<script src="http://${host}/stoppark/ui/js/jquery-ui-1.8.17.custom.min.js" ></script>
+<script src="http://${host}/stoppark/ui/js/jquery.ui.datepicker-ru.js" ></script>
+<script src="http://${host}/stoppark/ui/datatables/js/jquery.dataTables.min.js" ></script>
+<script src="http://${host}/stoppark/ui/datatables/js/jquery.dataTables.fnReloadAjax.js" ></script>
+<script src="http://${host}/stoppark/ui/js/jquery.jeditable.js" ></script>
+<script src="http://${host}/stoppark/ui/js/jquery.jeditable.datepicker.js" ></script>
+<script src="http://${host}/stoppark/ui/js/stoppark.js" ></script>
+<script src="http://${host}/assets/js/bootstrap.min.js"></script>
+
+
+
+</body>
+</html>
