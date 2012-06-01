@@ -244,7 +244,7 @@ $(document).ready(function() {
 
 
   var events = initTable('#events','/events',{})
-  var events = initTable('#payment','/payment',{})
+  var payment = initTable('#payment','/payment',{})
 
   setInterval(function() {
     if( $('#userlevel').text() == 'Пользователь' ) { 
@@ -254,6 +254,8 @@ $(document).ready(function() {
       cards.fnReloadAjax()
       tariff.fnReloadAjax()
       config.fnReloadAjax()
+      payment.fnReloadAjax()
+      events.fnReloadAjax()
     } else {
       sendCommand('/gstatus/update',{},function() {
         gstatus.fnReloadAjax()
@@ -268,10 +270,10 @@ $(document).ready(function() {
       })
 
       sendCommand('/events/update',{},function() {
-        tickets.fnReloadAjax()
+        events.fnReloadAjax()
       })
       sendCommand('/payment/update',{},function() {
-        tickets.fnReloadAjax()
+        payment.fnReloadAjax()
       })
     }
   },5000)

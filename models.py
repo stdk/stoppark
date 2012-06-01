@@ -141,14 +141,17 @@ class Tariff(Model):
 class Payment(Model):
  id = IntField(primary_key=True,visible=False)
  Payment = TextField()
+ Type = IntField()
  Kassa = IntField()
  Operator = TextField()
- DTime = TextField()
- Type = IntField()
+ DTime = TextField() 
  TalonID = TextField()
  Status = IntField()
- Tarif = TextField()
- Period = TextField()
+ TarifType = IntField()
+ Tarif = IntField()
+ TarifKol = IntField()
+ DTIn = TextField()
+ DTOut = TextField()
  Summa = IntField()
 
 class Events(Model):
