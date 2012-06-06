@@ -1,4 +1,4 @@
-from json import dump
+from json import dumps
 from http import access_check
 
 class Viewer(object):
@@ -14,7 +14,8 @@ class Viewer(object):
 
   req.ok('text/html')
   cached = level == 2
-  dump({'aaData': self.provider.aaData(cached) },req.wfile)
+  aaData = dumps({'aaData': self.provider.aaData(cached) })
+  req.wfile.write(aaData)
 
  def update(self,req):
   req.ok('text/html')
