@@ -229,7 +229,7 @@ $(document).ready(function() {
   for(var i = 2;i<12;i++) ticketEditors[i] = text
   var tickets = initTable('#tickets','/ticket',{'sort' : true,'filter':true })
 
-  var tariff_type = { type: 'select', data: { '1':'Фиксированный', '2':'Переменный' }, width: "40px" }
+  var tariff_type = { type: 'select', data: { '1':'Фиксированный', '2':'Переменный', '3' : 'Разовый' }, width: "40px" }
   var tariff_interval = { type: 'select', data: { '1':'час', '2':'сутки', '3':'месяц' }, width: "20px" }
   var tariff_cost = { type: 'costpicker', isExtended: function(row) {
     var result = false
