@@ -88,8 +88,9 @@ function initTable(selector,path,args) {
       }
  
       if('delete' in args && args['delete']) {
-        $(selector + ' tbody td:first-child div.del').remove()
-        $(selector + ' tbody td:first-child').prepend('<span class="del">⌫</span>&nbsp;')
+        //⌫
+        $(selector + ' tbody td:first-child span.del').remove()
+        $(selector + ' tbody td:first-child').prepend('<span class="del">X&nbsp;</span>')
         $(selector + ' tbody td:first-child span.del').click(function() {
           var element = this.parentNode
           jConfirm({
@@ -148,6 +149,8 @@ function initTable(selector,path,args) {
         }
       })
     })
+  } else {
+    $(selector+'-row-add').hide()
   }
 
   if('save-changes' in args && args['save-changes']) {
@@ -162,6 +165,8 @@ function initTable(selector,path,args) {
         }
       })
     })
+  } else {
+    $(selector+'-save-changes').hide()
   }
 
   if('cancel-changes' in args && args['cancel-changes']) {
@@ -176,12 +181,16 @@ function initTable(selector,path,args) {
         }
       })
     })
+  } else {
+    $(selector+'-cancel-changes').hide()
   }
 
   return table
 }
 
 $(document).ready(function() {
+  var admin = $('#userlevel').text() == 'Администратор'
+
   $('#tabs').tabs()
 
   $('select').live('change', function() {
@@ -197,10 +206,10 @@ $(document).ready(function() {
   $('#status_wrapper .fg-toolbar').hide()
 //  $('#status_wrapper tr:first-child th:first-child').hide()
 
-  arg_base = { 'add'            : true,
-               'save-changes'   : true,
-               'cancel-changes' : true,
-               'delete'         : true,
+  arg_base = { 'add'            : admin,
+               'save-changes'   : admin,
+               'cancel-changes' : admin,
+               'delete'         : admin,
                'filter'         : true,
                'sort'           : true }
 
@@ -233,21 +242,25 @@ $(document).ready(function() {
   var tariff_interval = { type: 'select', data: { '1':'час', '2':'сутки', '3':'месяц' }, width: "20px" }
   var tariff_cost = { type: 'costpicker', isExtended: function(row) {
     var result = false
-    row.find('td:nth-child(3)').each(function(idx,cell) { if( $(cell).text() == 'Переменный' ) result = true; })    
+    row.find('td:nth-child(3)').each(function(idx,cell) {
+      if( $(cell).text() == 'Переменный' ) result = true;
+    })    
     return result
   } }
   var tariffEditors = { 2: text, 3: tariff_type, 4: tariff_interval, 5: tariff_cost, 6: time, 7: text, 8: text }
   var tariff = initTable('#tariffs','/tariff',$.extend( { editors: tariffEditors },arg_base))
   
   var configEditors = { 1: text, 2: text}
-  var config = initTable('#config','/config',{ editors: configEditors, 'save-changes' : true, 'cancel-changes' : true })
+  var config = initTable('#config','/config',{ editors: configEditors,
+                                               'save-changes' : admin,
+                                               'cancel-changes' : admin })
 
 
   var events = initTable('#events','/events',{})
   var payment = initTable('#payment','/payment',{})
 
   setInterval(function() {
-    if( $('#userlevel').text() == 'Пользователь' ) { 
+    if( !admin ) { 
       gstatus.fnReloadAjax()
       lstatus.fnReloadAjax()
       tickets.fnReloadAjax()
@@ -276,6 +289,6 @@ $(document).ready(function() {
         payment.fnReloadAjax()
       })
     }
-  },5000)
+  },8000)
 
 })
