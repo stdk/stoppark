@@ -89,9 +89,13 @@ function initTable(selector,path,args) {
  
       if('delete' in args && args['delete']) {
         //⌫
-        $(selector + ' tbody td:first-child span.del').remove()
-        $(selector + ' tbody td:first-child').prepend('<span class="del">X&nbsp;</span>')
-        $(selector + ' tbody td:first-child span.del').click(function() {
+        var button_template = '<input type="button" style="padding: 0px;width: 16px;height:16px" value="X" />&nbsp;'
+        $(selector + ' tbody td:first-child').not(':has(input)').prepend(button_template)
+                                             
+        //$(selector + ' tbody td:first-child span.del').remove()
+        //$(selector + ' tbody td:first-child').prepend('<span class="del">X&nbsp;</span>')
+        //$(selector + ' tbody td:first-child span.del').click(function() {
+        $(selector + ' tbody td:first-child input').button().click(function() {
           var element = this.parentNode
           jConfirm({
             message : 'Удалить ' + $(this.parentNode).text().substring(1) + '?',
@@ -188,8 +192,11 @@ function initTable(selector,path,args) {
   return table
 }
 
+
+
 $(document).ready(function() {
   var admin = $('#userlevel').text() == 'Администратор'
+  $('#userinfo').addClass({true: 'admin', false: 'user'}[admin])
 
   $('#tabs').tabs()
 

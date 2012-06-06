@@ -40,32 +40,46 @@ table * {
   font-size: 11px;
 }
 
-#status * {
+/*#status * {
   font-size: 14px;
+}*/
+
+#userinfo {
+  text-align: right;
+  
+  width: 100%;
 }
 
-#user {
+.admin {
+  background-color: #99CC33;
+}
+
+.user {
+  background-color: #FFFF99;
+}
+
+/*#user {
 	position: absolute;
 	right: 0px;
 	top: 0px;
 	z-index: 1000;
-}
+}*/
 
 </style>
 
 </head>
 <body>
 
-<div id="user"><span id="userlevel">${level}</span>: ${user} [<a href="http://logout@${host}:2000/auth">Выход</a>]</div>
+<div id="userinfo"><span id="userlevel">${level}</span>: ${user} [<a href="http://logout@${host}:2000/auth">Выход</a>]</div>
 
 <div>
 <table id="status" cellpadding="0" cellspacing="0" border="0" class="display" style="margin-bottom: 10px">
   <thead>
    <tr>
-    <th colspan="19" style="background-color: #CCC">Парковка</th>
+    <th colspan="19" style="background-color: #CCC"><h2>Парковка</h2></th>
    </tr>
    <tr>
-    <th colspan="5" style="background-color: #EEE">Вьезд</th>
+    <th colspan="5" style="background-color: #EEE">Въезд</th>
     <th colspan="5" style="background-color: #DDD">Выезд</th>
     <th colspan="5" style="background-color: #EEE">Оплачено</th>
     <th colspan="2" style="background-color: #DDD">Виды оплаты</th>
@@ -200,27 +214,6 @@ table * {
    <th>Сумма</th>     
   </tr>
 </thead>
-
-<tfoot>
-  <tr>
-   <th>#</th>          
-   <th>Тип</th>          
-   <th>ID</th>     
-   <th>Рег.</th>     
-   <th>Действ.</th>     
-   <th>Имя</th>     
-   <th>Отчество</th>     
-   <th>Фамилия</th>     
-   <th>Телефон</th>     
-   <th>Госномер</th>     
-   <th>Марка</th>     
-   <th>Цвет</th>     
-   <th>Статус</th>     
-   <th>Тариф</th>     
-   <th>Цена</th>     
-   <th>Сумма</th>     
-  </tr>
-</tfoot>
 
 <tbody></tbody>
 </table>
