@@ -1,0 +1,32 @@
+*** python2.7/json/encoder.py	2012-06-06 12:54:47.554083639 +0300
+--- python2.7/json/patched_encoder.py	2012-06-06 12:46:56.482083879 +0300
+***************
+*** 65,72 ****
+      return '"' + str(ESCAPE_ASCII.sub(replace, s)) + '"'
+  
+  
+  encode_basestring_ascii = (
+!     c_encode_basestring_ascii or py_encode_basestring_ascii)
+  
+  class JSONEncoder(object):
+      """Extensible JSON <http://json.org> encoder for Python data structures.
+--- 65,83 ----
+      return '"' + str(ESCAPE_ASCII.sub(replace, s)) + '"'
+  
+  
++ def ex_c_encode_basestring_ascii(s):
++     """Since there is no way to handle single unicode decoding error for
++        c_encode_basestring_ascii function provided in C extension,
++        this wrapper handles this situation returning empty string instead
++        of exception
++     """
++     try:
++         return c_encode_basestring_ascii(s)
++     except UnicodeDecodeError:
++         return '""'
++ 
+  encode_basestring_ascii = (
+!     ex_c_encode_basestring_ascii or py_encode_basestring_ascii)
+  
+  class JSONEncoder(object):
+      """Extensible JSON <http://json.org> encoder for Python data structures.
