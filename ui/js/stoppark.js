@@ -263,8 +263,8 @@ $(document).ready(function() {
                                                'cancel-changes' : admin })
 
 
-  var events = initTable('#events','/events',{})
-  var payment = initTable('#payment','/payment',{})
+  var events = initTable('#events','/events',arg_base)
+  var payment = initTable('#payment','/payment',arg_base)
 
   setInterval(function() {
     if( !admin ) { 
