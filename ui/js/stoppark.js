@@ -213,12 +213,12 @@ $(document).ready(function() {
   $('#status_wrapper .fg-toolbar').hide()
 //  $('#status_wrapper tr:first-child th:first-child').hide()
 
-  arg_base = { 'add'            : admin,
-               'save-changes'   : admin,
-               'cancel-changes' : admin,
-               'delete'         : admin,
-               'filter'         : true,
-               'sort'           : true }
+  var arg_base = { 'add'            : admin,
+                   'save-changes'   : admin,
+                   'cancel-changes' : admin,
+                   'delete'         : admin,
+                   'filter'         : true,
+                   'sort'           : true }
 
   var text = { height: "10px", width: "90px" }
   var color = { height: "10px", data: " {'Черный':'Черный','Белый':'Белый','Желтый':'Желтый', 'selected':'Черный'}", type: 'select' }
@@ -243,7 +243,7 @@ $(document).ready(function() {
 
   var ticketEditors = {}
   for(var i = 2;i<12;i++) ticketEditors[i] = text
-  var tickets = initTable('#tickets','/ticket',{'sort' : true,'filter':true })
+  var tickets = initTable('#tickets','/ticket',/*{'sort' : true,'filter':true }*/$.extend({},arg_base))
 
   var tariff_type = { type: 'select', data: { '1':'Фиксированный', '2':'Переменный', '3' : 'Разовый' }, width: "40px" }
   var tariff_interval = { type: 'select', data: { '1':'час', '2':'сутки', '3':'месяц' }, width: "20px" }
@@ -263,8 +263,8 @@ $(document).ready(function() {
                                                'cancel-changes' : admin })
 
 
-  var events = initTable('#events','/events',arg_base)
-  var payment = initTable('#payment','/payment',arg_base)
+  var events = initTable('#events','/events',$.extend({},arg_base))
+  var payment = initTable('#payment','/payment',$.extend({},arg_base))
 
   setInterval(function() {
     if( !admin ) { 
