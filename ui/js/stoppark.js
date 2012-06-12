@@ -192,7 +192,76 @@ function initTable(selector,path,args) {
   return table
 }
 
+var init = {
+  gstatus: function(arg_base,generic_editors) {
+    var gstatus = initTable('#status','/gstatus',{})
+    $('#status_wrapper .fg-toolbar').hide()
+    return gstatus
+  },
 
+  lstatus: function(arg_base,generic_editors) {
+    return initTable('#boards','/lstatus',{})
+  },
+
+  cards: function(arg_base,generic_editors) {
+    var card_type = { data : {'0':'служебный','1':'разовый','2':'клиент','3':'кассир','4':'админ'}, type : 'select' }
+    var card_status = { data : {'1':'разрешен','2':'утерян','3':'просрочен','4':'запрещен'}, type : 'select' }
+
+    var cardEditors = {}
+    for(var i=2;i<17;i++) cardEditors[i] = generic_editors.text
+    cardEditors[2] = card_type
+    cardEditors[4] = generic_editors.date
+    cardEditors[5] = generic_editors.date
+    cardEditors[13] = card_status
+    var cards = initTable('#cards','/card',$.extend( { editors: cardEditors },arg_base))
+
+    $('#cards_filter input').autocomplete({
+      source: [  'разрешен','запрещен','администратор','кассир','пропуск' ],
+      minLength: 0
+    })
+
+    return cards
+  },
+
+  tickets: function(arg_base,generic_editors) {
+    var ticketEditors = {}
+    for(var i = 2;i<12;i++) ticketEditors[i] = generic_editors.text
+    return initTable('#tickets','/ticket',$.extend({},arg_base))
+  },
+
+  tariffs: function(arg_base,generic_editors) {
+    var text = generic_editors.text
+    var tariff_type = { type: 'select', data: { '1':'Фиксированный', '2':'Переменный', '3' : 'Разовый' }, width: "40px" }
+    var tariff_interval = { type: 'select', data: { '1':'час', '2':'сутки', '3':'месяц' }, width: "20px" }
+    var tariff_cost = { type: 'costpicker', isExtended: function(row) {
+      var result = false
+      row.find('td:nth-child(3)').each(function(idx,cell) {
+        if( $(cell).text() == 'Переменный' ) result = true;
+      })    
+      return result
+    } }
+    var tariffEditors = { 2: text, 3: tariff_type, 4: tariff_interval, 5: tariff_cost, 6: generic_editors.time, 7: text, 8: text }
+    return initTable('#tariffs','/tariff',$.extend( { editors: tariffEditors },arg_base))    
+  },
+
+  config: function(arg_base,generic_editors) {
+    var configEditors = { 1: generic_editors.text, 2: generic_editors.text}
+    var args = $.extend({ editors: configEditors }, arg_base)
+    $.extend(args,{ add:    false,
+                    delete: false,
+                    filter: false,
+                    sort:   false })
+    return initTable('#config','/config',args)
+  },
+
+  events: function(arg_base,generic_editors) {
+    return initTable('#events','/events',$.extend({},arg_base))
+  },
+
+  payments: function(arg_base,generic_editors) {
+    return initTable('#payment','/payment',$.extend({},arg_base))
+  }
+}
 
 $(document).ready(function() {
   var admin = $('#userlevel').text() == 'Администратор'
@@ -208,11 +277,6 @@ $(document).ready(function() {
     if(event.keyCode == 13) $(this).parent().submit();
   })
 
-  var gstatus = initTable('#status','/gstatus',{})
-  var lstatus = initTable('#boards','/lstatus',{})  
-  $('#status_wrapper .fg-toolbar').hide()
-//  $('#status_wrapper tr:first-child th:first-child').hide()
-
   var arg_base = { 'add'            : admin,
                    'save-changes'   : admin,
                    'cancel-changes' : admin,
@@ -220,80 +284,53 @@ $(document).ready(function() {
                    'filter'         : true,
                    'sort'           : true }
 
-  var text = { height: "10px", width: "90px" }
-  var color = { height: "10px", data: " {'Черный':'Черный','Белый':'Белый','Желтый':'Желтый', 'selected':'Черный'}", type: 'select' }
-  var date = { type: 'datepicker' }
-  var time = { type: 'timepicker' } 
+  var generic_editors = {
+    text:  { height: "10px", width: "90px" },
+    date:  { type: 'datepicker' },
+    time:  { type: 'timepicker' },
+    color: { height: "10px", data: " {'Черный':'Черный','Белый':'Белый','Желтый':'Желтый', 'selected':'Черный'}", type: 'select' } 
+  }
 
-  var card_type = { data : {'0':'служебный','1':'разовый','2':'клиент','3':'кассир','4':'админ'}, type : 'select' }
-  var card_status = { data : {'1':'разрешен','2':'утерян','3':'просрочен','4':'запрещен'}, type : 'select' }
+  var table_config = { gstatus:  true,
+                       lstatus:  true,
+                       tickets:  true,
+                       cards:    true,
+                       tariffs:  true,                                              
+                       config:   true,
+                       payments: true,
+                       events:   true
+  }
 
-  var cardEditors = {}
-  for(var i=2;i<17;i++) cardEditors[i] = text
-  cardEditors[2] = card_type
-  cardEditors[4] = date
-  cardEditors[5] = date
-  cardEditors[13] = card_status
-  var cards = initTable('#cards','/card',$.extend( { editors: cardEditors },arg_base))
-
-  $('#cards_filter input').autocomplete({
-   source: [  'разрешен','запрещен','администратор','кассир','пропуск' ],
-   minLength: 0
-  }) 
-
-  var ticketEditors = {}
-  for(var i = 2;i<12;i++) ticketEditors[i] = text
-  var tickets = initTable('#tickets','/ticket',/*{'sort' : true,'filter':true }*/$.extend({},arg_base))
-
-  var tariff_type = { type: 'select', data: { '1':'Фиксированный', '2':'Переменный', '3' : 'Разовый' }, width: "40px" }
-  var tariff_interval = { type: 'select', data: { '1':'час', '2':'сутки', '3':'месяц' }, width: "20px" }
-  var tariff_cost = { type: 'costpicker', isExtended: function(row) {
-    var result = false
-    row.find('td:nth-child(3)').each(function(idx,cell) {
-      if( $(cell).text() == 'Переменный' ) result = true;
-    })    
-    return result
-  } }
-  var tariffEditors = { 2: text, 3: tariff_type, 4: tariff_interval, 5: tariff_cost, 6: time, 7: text, 8: text }
-  var tariff = initTable('#tariffs','/tariff',$.extend( { editors: tariffEditors },arg_base))
-  
-  var configEditors = { 1: text, 2: text}
-  var config = initTable('#config','/config',{ editors: configEditors,
-                                               'save-changes' : admin,
-                                               'cancel-changes' : admin })
-
-
-  var events = initTable('#events','/events',$.extend({},arg_base))
-  var payment = initTable('#payment','/payment',$.extend({},arg_base))
+  var tables = {}
+  for(var key in table_config) {
+    console.log(key)
+    tables[key] = init[key](arg_base,generic_editors)
+  }
 
   setInterval(function() {
     if( !admin ) { 
-      gstatus.fnReloadAjax()
-      lstatus.fnReloadAjax()
-      tickets.fnReloadAjax()
-      cards.fnReloadAjax()
-      tariff.fnReloadAjax()
-      config.fnReloadAjax()
-      payment.fnReloadAjax()
-      events.fnReloadAjax()
+      for(var key in tables) {
+        tables[key].fnReloadAjax()
+      }
     } else {
       sendCommand('/gstatus/update',{},function() {
-        gstatus.fnReloadAjax()
+        tables.gstatus.fnReloadAjax()
       }) 
 
       sendCommand('/lstatus/update',{},function() {
-        lstatus.fnReloadAjax()
+        tables.lstatus.fnReloadAjax()
       })
    
       sendCommand('/ticket/update',{},function() {
-        tickets.fnReloadAjax()
+        tables.tickets.fnReloadAjax()
       })
 
       sendCommand('/events/update',{},function() {
-        events.fnReloadAjax()
+        tables.events.fnReloadAjax()
       })
+
       sendCommand('/payment/update',{},function() {
-        payment.fnReloadAjax()
+        tables.payments.fnReloadAjax()
       })
     }
   },8000)
