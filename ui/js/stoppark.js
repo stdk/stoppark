@@ -91,10 +91,6 @@ function initTable(selector,path,args) {
         //⌫
         var button_template = '<input type="button" style="padding: 0px;width: 16px;height:16px" value="X" />&nbsp;'
         $(selector + ' tbody td:first-child').not(':has(input)').prepend(button_template)
-                                             
-        //$(selector + ' tbody td:first-child span.del').remove()
-        //$(selector + ' tbody td:first-child').prepend('<span class="del">X&nbsp;</span>')
-        //$(selector + ' tbody td:first-child span.del').click(function() {
         $(selector + ' tbody td:first-child input').button().click(function() {
           var element = this.parentNode
           jConfirm({
@@ -260,11 +256,11 @@ var init = {
 
   config: function(arg_base,generic_editors) {
     var configEditors = { 1: generic_editors.text, 2: generic_editors.text}
-    var args = $.extend({ editors: configEditors }, arg_base)
-    $.extend(args,{ add:    false,
-                    delete: false,
-                    filter: false,
-                    sort:   false })
+    var args = $.extend({ editors: configEditors }, arg_base, 
+      { add:    false,
+        delete: false,
+        filter: false,
+        sort:   false  } )
     return initTable('#config','/config',args)
   },
 
@@ -303,7 +299,7 @@ $(document).ready(function() {
     date:  { type: 'datepicker' },
     time:  { type: 'timepicker' },
     color: { height: "10px", data: " {'Черный':'Черный','Белый':'Белый','Желтый':'Желтый', 'selected':'Черный'}", type: 'select' } 
-  }
+  }  
 
   var table_config = { gstatus:  true,
                        lstatus:  true,
@@ -317,7 +313,6 @@ $(document).ready(function() {
 
   var tables = {}
   for(var key in table_config) {
-    console.log(key)
     tables[key] = init[key](arg_base,generic_editors)
   }
 
@@ -329,7 +324,7 @@ $(document).ready(function() {
     } else {
       sendCommand('/gstatus/update',{},function() {
         tables.gstatus.fnReloadAjax()
-      }) 
+      })
 
       sendCommand('/lstatus/update',{},function() {
         tables.lstatus.fnReloadAjax()
