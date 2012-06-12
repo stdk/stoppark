@@ -32,7 +32,7 @@ function jConfirm(args) {
       args['cancel']()
     }
   }
- });
+ })
 }
 
 function sendCommand(path,args,success) {
@@ -204,8 +204,21 @@ var init = {
   },
 
   cards: function(arg_base,generic_editors) {
-    var card_type = { data : {'0':'служебный','1':'разовый','2':'клиент','3':'кассир','4':'админ'}, type : 'select' }
-    var card_status = { data : {'1':'разрешен','2':'утерян','3':'просрочен','4':'запрещен'}, type : 'select' }
+    var card_type = { data: {'0':'служебный','1':'разовый','2':'клиент','3':'кассир','4':'админ'}, type : 'select' }
+    var card_status = { data: {'1':'разрешен','2':'утерян','3':'просрочен','4':'запрещен'}, type : 'select' }
+    var tariffs = { data: {}, type: 'select' }
+
+    $.ajax({
+        async: false,
+        type: "GET",
+        url: '/tariff/data',
+        success: function(data,textStatus,jqXHR) {
+          var aaData = $.parseJSON(data).aaData
+          $.each(aaData,function(index,value) {
+            tariffs.data[value[0]] = value[1]
+          })
+        }        
+    })   
 
     var cardEditors = {}
     for(var i=2;i<17;i++) cardEditors[i] = generic_editors.text
@@ -213,6 +226,7 @@ var init = {
     cardEditors[4] = generic_editors.date
     cardEditors[5] = generic_editors.date
     cardEditors[13] = card_status
+    cardEditors[14] = tariffs
     var cards = initTable('#cards','/card',$.extend( { editors: cardEditors },arg_base))
 
     $('#cards_filter input').autocomplete({
@@ -276,7 +290,7 @@ $(document).ready(function() {
   $('select').live('keydown', function (event) {
     if(event.keyCode == 13) $(this).parent().submit();
   })
-
+  
   var arg_base = { 'add'            : admin,
                    'save-changes'   : admin,
                    'cancel-changes' : admin,
