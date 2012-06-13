@@ -188,6 +188,30 @@ function initTable(selector,path,args) {
   return table
 }
 
+function getForeignKeyData(path,args)
+{
+  var result = {}
+
+  if(!args) args = {}
+
+  var i = 'i' in args ? args.i : 0
+  var j = 'j' in args ? args.j : 1
+
+  $.ajax({
+      async: 'async' in args ? args.async : false,
+      type: "GET",
+      url: path,
+      success: function(data,textStatus,jqXHR) {
+        var aaData = $.parseJSON(data).aaData
+        $.each(aaData,function(index,value) {
+          result[value[i]] = value[j]
+        })
+      }        
+  }) 
+
+  return result
+}
+
 var init = {
   gstatus: function(arg_base,generic_editors) {
     var gstatus = initTable('#status','/gstatus',{})
@@ -202,19 +226,6 @@ var init = {
   cards: function(arg_base,generic_editors) {
     var card_type = { data: {'0':'служебный','1':'разовый','2':'клиент','3':'кассир','4':'админ'}, type : 'select' }
     var card_status = { data: {'1':'разрешен','2':'утерян','3':'просрочен','4':'запрещен'}, type : 'select' }
-    var tariffs = { data: {}, type: 'select' }
-
-    $.ajax({
-        async: false,
-        type: "GET",
-        url: '/tariff/data',
-        success: function(data,textStatus,jqXHR) {
-          var aaData = $.parseJSON(data).aaData
-          $.each(aaData,function(index,value) {
-            tariffs.data[value[0]] = value[1]
-          })
-        }        
-    })   
 
     var cardEditors = {}
     for(var i=2;i<17;i++) cardEditors[i] = generic_editors.text
@@ -222,7 +233,7 @@ var init = {
     cardEditors[4] = generic_editors.date
     cardEditors[5] = generic_editors.date
     cardEditors[13] = card_status
-    cardEditors[14] = tariffs
+    cardEditors[14] = generic_editors.tariff
     var cards = initTable('#cards','/card',$.extend( { editors: cardEditors },arg_base))
 
     $('#cards_filter input').autocomplete({
@@ -234,9 +245,8 @@ var init = {
   },
 
   tickets: function(arg_base,generic_editors) {
-    var ticketEditors = {}
-    for(var i = 2;i<12;i++) ticketEditors[i] = generic_editors.text
-    return initTable('#tickets','/ticket',$.extend({},arg_base))
+    var editors = { 3: generic_editors.tariff, 11: generic_editors.status }
+    return initTable('#tickets', '/ticket', $.extend({editors: editors},arg_base,{delete: false}))
   },
 
   tariffs: function(arg_base,generic_editors) {
@@ -265,11 +275,45 @@ var init = {
   },
 
   events: function(arg_base,generic_editors) {
-    return initTable('#events','/events',$.extend({},arg_base))
+    var events = { 
+      type: 'select',
+      data: {
+        'moving' :'Проезд',
+        'opening':'Открытие',
+        'unknown':'Неизвестно'
+      }
+    }
+
+    var direction = {
+      type: 'select',
+      data: {
+        'into'   :'Въезд',
+        'outfrom':'Выезд'
+      }
+    }
+
+    var reason = {
+      type: 'select',
+      data: {
+        'auto'   :'Автоматический',
+        'manual' :'Ручной'
+      }
+    }
+    var editors = { 1: events, 4: direction, 5: reason }
+    return initTable('#events','/events',$.extend({editors: editors},arg_base,{delete: false}))
   },
 
   payments: function(arg_base,generic_editors) {
-    return initTable('#payment','/payment',$.extend({},arg_base))
+    var payments = {
+      type: 'select',
+      data: {
+        'Card payment'  : 'Абонемент',
+        'Single payment': 'Разовый',
+        'Talon payment' : 'Талон'
+      }
+    }
+    var editors = { 1: payments, 2: generic_editors.tariff, 7: generic_editors.status }
+    return initTable('#payment','/payment',$.extend({editors: editors},arg_base,{delete: false}))
   }
 }
 
@@ -298,8 +342,16 @@ $(document).ready(function() {
     text:  { height: "10px", width: "90px" },
     date:  { type: 'datepicker' },
     time:  { type: 'timepicker' },
-    color: { height: "10px", data: " {'Черный':'Черный','Белый':'Белый','Желтый':'Желтый', 'selected':'Черный'}", type: 'select' } 
-  }  
+    color: { height: "10px", data: " {'Черный':'Черный','Белый':'Белый','Желтый':'Желтый', 'selected':'Черный'}", type: 'select' },
+    status: { type: 'select', data: { '1' : 'Въехал', '5' : 'Оплачен', '13': 'Выехал' } },
+    tariff: { width: '20px', type: 'select', data: {} },
+
+    update: function(async) {
+      this.tariff.data = getForeignKeyData('/tariff/data',{ i: 0, j: 1, async: async })
+    }
+  }
+
+  generic_editors.update(false)  
 
   var table_config = { gstatus:  true,
                        lstatus:  true,
@@ -317,6 +369,8 @@ $(document).ready(function() {
   }
 
   setInterval(function() {
+    generic_editors.update(true)
+
     if( !admin ) { 
       for(var key in tables) {
         tables[key].fnReloadAjax()
