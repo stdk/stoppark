@@ -60,10 +60,12 @@ class SQLHandler(asyncore.dispatcher_with_send):
     c = conn.cursor()
     c.execute(data)
     counter = 0
+    buffer = ''
     for row in c:
      counter += 1
-     self.send('|'.join( str(field) for field in row )+'\n')
+     buffer += '|'.join( str(field) for field in row )+'\n'
     if not counter: self.send('NONE\n')    
+    else: self.send(buffer)
     conn.commit()
    except Exception as e:
     print e
