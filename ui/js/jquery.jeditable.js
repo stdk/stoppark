@@ -326,7 +326,7 @@
                               submitdata[settings.id] = self.id;
                               /* add extra data to be POST:ed */
                               if ($.isFunction(settings.submitdata)) {
-                                  $.extend(submitdata, settings.submitdata.apply(self, [self.revert, settings]));
+                                  $.extend(submitdata, settings.submitdata.apply(self, [input.val(), settings]));
                               } else {
                                   $.extend(submitdata, settings.submitdata);
                               }
