@@ -49,46 +49,80 @@ function sendCommand(path,args,success) {
 
 function initTable(selector,path,args) {
 
-  var drawCallback = function() {}
+  var draw_callback = function() {}
 
   if('editors' in args) {
     var editors = args.editors
-    var drawCallback = function() {
-      var common_callback = function( value, settings ) {
-        var aPos = table.fnGetPosition( this );
-        table.fnUpdate( value, aPos[0], aPos[1] );
-        $(this).css('font-weight','bold')
+    var jEditable = 'jEditable' in args ? args.jEditable : true
+
+    var callback = function( value, settings ) {
+      if('transform' in settings) {
+        value = settings.transform(value)
+        $(this).data('value',value)
       }
 
-      var submitdata = function ( value, settings ) {
-        return {
-          "row" : table.fnGetPosition( this )[0],
-          "col" : table.fnGetPosition( this )[1]
-        };
+      var aPos = table.fnGetPosition( this )
+      table.fnUpdate( value, aPos[0], aPos[1], false )
+      $(this).css('font-weight','bold')
+    }
+
+    var submitdata = function ( value, settings ) {
+      var result = {
+        "row" : table.fnGetPosition( this )[0],
+        "col" : table.fnGetPosition( this )[1]
       }
 
-      var editor_base = {
-        callback: common_callback,
-        submitdata: submitdata
+      if('reverse_transform' in settings) {
+        result[settings.name] = settings.reverse_transform(value)
       }
+
+      return result
+    }
+
+    var editor_base = {
+      callback: callback,
+      submitdata: submitdata,
+    }
+
+    var draw_callback = function() {
+      console.log('draw_callback')
 
       for(var child in editors) {
         var editor = editors[child]
-        var elements = $(selector + ' tbody td:nth-child(' + child +')')
-        elements.editable(path + '/edit',$.extend(editor,editor_base))
+        var elements = $(selector + ' tbody td:nth-child(' + child +')')        
+
+        //jEditable attribute in editor prevails over global jEditor parameter
+        if( ('jEditable' in editor && editor.jEditable) || ( !('jEditable' in editor) && jEditable) ) {
+          elements.editable(path + '/edit',$.extend(editor,editor_base))
+        }
+
+        //data options allow us to replace value in cell with another value using predefined dictionary
         if('data' in editor) {
-            elements.each(function(index,element) {
-              var value = $(element).text()
-              if(value in editor.data) {
-                var aPos = table.fnGetPosition( element );
-                table.fnUpdate( editor.data[value], aPos[0], aPos[1] , false);
-              }
-            })          
+          elements.each(function(index,element) {
+            var value = $(element).text()
+            if(value in editor.data) {
+              var aPos = table.fnGetPosition( element )
+              table.fnUpdate( editor.data[value], aPos[0], aPos[1] , false)
+            }
+          })          
+        }
+
+        //transform option allows us to change value in cell using predefined function
+        if('transform' in editor) {
+          elements.each(function(index,element) {
+            var e = $(element)
+            var value = e.text()
+            if(e.data('value') != value) {
+              var transformed_value = editor.transform(value)
+              var aPos = table.fnGetPosition( element )
+              table.fnUpdate(transformed_value, aPos[0], aPos[1] , false)
+              e.data('value',transformed_value)
+            }
+          })
         }
       }
  
       if('delete' in args && args['delete']) {
-        //⌫
         var button_template = '<input type="button" style="padding: 0px;width: 16px;height:16px" value="X" />&nbsp;'
         $(selector + ' tbody td:first-child').not(':has(input)').prepend(button_template)
         $(selector + ' tbody td:first-child input').button().click(function() {
@@ -132,8 +166,23 @@ function initTable(selector,path,args) {
         sAjaxSource: path + '/data',
         sPaginationType: 'full_numbers' ,
         aoColumnDefs: [],
+        bDeferRender: true,
+
+/*
+        aoColumnDefs: [ 
+            {
+                "fnRender": function ( oObj, sVal ) {
+                    return oObj.aData[0];
+                },
+                "aTargets": [ 0 ]
+            },
+            { sWidth: '10px', aTargets: [0] }
+            //{ "bVisible": false,  "aTargets": [ 3 ] },
+            //{ "sClass": "center", "aTargets": [ 4 ] }
+        ],
+*/
         //sDom : 'fltrip',
-        fnDrawCallback: drawCallback
+        fnDrawCallback: draw_callback
   });
 
   if('add' in args && args.add) {
@@ -223,18 +272,20 @@ var init = {
     return initTable('#boards','/lstatus',{})
   },
 
-  cards: function(arg_base,generic_editors) {
+  cards: function(arg_base,generic) {
     var card_type = { data: {'0':'служебный','1':'разовый','2':'клиент','3':'кассир','4':'админ'}, type : 'select' }
     var card_status = { data: {'1':'разрешен','2':'утерян','3':'просрочен','4':'запрещен'}, type : 'select' }
 
-    var cardEditors = {}
-    for(var i=2;i<17;i++) cardEditors[i] = generic_editors.text
-    cardEditors[2] = card_type
-    cardEditors[4] = generic_editors.date
-    cardEditors[5] = generic_editors.date
-    cardEditors[13] = card_status
-    cardEditors[14] = generic_editors.tariff
-    var cards = initTable('#cards','/card',$.extend( { editors: cardEditors },arg_base))
+    var editors = {}
+    for(var i=2;i<17;i++) editors[i] = generic.text
+    editors[2] = card_type
+    editors[4] = generic.date
+    editors[5] = generic.date
+    editors[13] = card_status
+    editors[14] = generic.tariff
+    editors[15] = generic.price
+    editors[16] = generic.price
+    var cards = initTable('#cards','/card',$.extend( { editors: editors },arg_base))
 
     $('#cards_filter input').autocomplete({
       source: [  'разрешен','запрещен','администратор','кассир','пропуск' ],
@@ -244,16 +295,16 @@ var init = {
     return cards
   },
 
-  tickets: function(arg_base,generic_editors) {
-    var editors = { 3: generic_editors.tariff, 11: generic_editors.status }
-    return initTable('#tickets', '/ticket', $.extend({editors: editors},arg_base,{delete: false}))
+  tickets: function(arg_base,generic) {
+    var editors = { 3: generic.tariff, 4: generic.price, 5: generic.price, 11: generic.status }
+    return initTable('#tickets', '/ticket', $.extend({editors: editors},arg_base,{delete: false, jEditable: false}))
   },
 
   tariffs: function(arg_base,generic_editors) {
     var text = generic_editors.text
     var tariff_type = { type: 'select', data: { '1':'Фиксированный', '2':'Переменный', '3' : 'Разовый' }, width: "40px" }
     var tariff_interval = { type: 'select', data: { '1':'час', '2':'сутки', '3':'месяц' }, width: "20px" }
-    var tariff_cost = { type: 'costpicker', isExtended: function(row) {
+    var tariff_cost = { type: 'costpicker', jEditable: true, isExtended: function(row) {
       var result = false
       row.find('td:nth-child(3)').each(function(idx,cell) {
         if( $(cell).text() == 'Переменный' ) result = true;
@@ -274,46 +325,25 @@ var init = {
     return initTable('#config','/config',args)
   },
 
-  events: function(arg_base,generic_editors) {
-    var events = { 
-      type: 'select',
-      data: {
-        'moving' :'Проезд',
-        'opening':'Открытие',
-        'unknown':'Неизвестно'
-      }
-    }
-
-    var direction = {
-      type: 'select',
-      data: {
-        'into'   :'Въезд',
-        'outfrom':'Выезд'
-      }
-    }
-
-    var reason = {
-      type: 'select',
-      data: {
-        'auto'   :'Автоматический',
-        'manual' :'Ручной'
-      }
-    }
+  events: function(arg_base,generic) {
+    var events = { type: 'select', data: { 'moving' :'Проезд','opening':'Открытие', 'unknown':'Неизвестно' } }
+    var direction = { type: 'select', data: { 'into'   :'Въезд', 'outfrom':'Выезд' } }
+    var reason = { type: 'select', data: { 'auto'   :'Автоматический', 'manual' :'Ручной' } }
     var editors = { 1: events, 4: direction, 5: reason }
-    return initTable('#events','/events',$.extend({editors: editors},arg_base,{delete: false}))
+    return initTable('#events','/events',$.extend({editors: editors},arg_base,{delete: false, jEditable: false}))
   },
 
-  payments: function(arg_base,generic_editors) {
-    var payments = {
-      type: 'select',
+  payments: function(arg_base,generic) {
+    var payments = { type: 'select',
       data: {
         'Card payment'  : 'Абонемент',
         'Single payment': 'Разовый',
         'Talon payment' : 'Талон'
       }
     }
-    var editors = { 1: payments, 2: generic_editors.tariff, 7: generic_editors.status }
-    return initTable('#payment','/payment',$.extend({editors: editors},arg_base,{delete: false}))
+
+    var editors = { 1: payments, 3: generic.tariff, 7: generic.status, 8: generic.price, 12: generic.price }
+    return initTable('#payment','/payment',$.extend({editors: editors},arg_base,{delete: false, jEditable: false}))
   }
 }
 
@@ -331,7 +361,8 @@ $(document).ready(function() {
     if(event.keyCode == 13) $(this).parent().submit();
   })
   
-  var arg_base = { 'add'            : admin,
+  var arg_base = { 'jEditable'      : admin,
+                   'add'            : admin,
                    'save-changes'   : admin,
                    'cancel-changes' : admin,
                    'delete'         : admin,
@@ -339,37 +370,39 @@ $(document).ready(function() {
                    'sort'           : true }
 
   var generic_editors = {
-    text:  { height: "10px", width: "90px" },
-    date:  { type: 'datepicker' },
-    time:  { type: 'timepicker' },
-    color: { height: "10px", data: " {'Черный':'Черный','Белый':'Белый','Желтый':'Желтый', 'selected':'Черный'}", type: 'select' },
+    text  : { height: "9px", width: "70px" },
+    date  : { type: 'datepicker' },
+    time  : { type: 'timepicker' },
+    color : { height: "10px", data: " {'Черный':'Черный','Белый':'Белый','Желтый':'Желтый', 'selected':'Черный'}", type: 'select' },
     status: { type: 'select', data: { '1' : 'Въехал', '5' : 'Оплачен', '13': 'Выехал' } },
-    tariff: { width: '20px', type: 'select', data: {} },
+    tariff: { type: 'select', data: {} },
+    price : { height:"9px",
+             transform: function(value) { return (parseFloat('0'+value)/100).toString() },
+             reverse_transform: function(value) { return (parseFloat('0'+value)*100).toString() }
+    },
 
-    update: function(async) {
+    doUpdate: function(async) {
       this.tariff.data = getForeignKeyData('/tariff/data',{ i: 0, j: 1, async: async })
     }
   }
 
-  generic_editors.update(false)  
-
-  var table_config = { gstatus:  true,
-                       lstatus:  true,
-                       tickets:  true,
-                       cards:    true,
-                       tariffs:  true,                                              
-                       config:   true,
-                       payments: true,
-                       events:   true
-  }
+  generic_editors.doUpdate(false)  
 
   var tables = {}
-  for(var key in table_config) {
-    tables[key] = init[key](arg_base,generic_editors)
-  }
+  $.each({ gstatus:  true,
+           lstatus:  true,
+           tickets:  true,
+           cards:    true,
+           tariffs:  true,                                              
+           config:   true,
+           payments: true,
+           events:   true
+  },function(key,value) {
+    if(value) tables[key] = init[key](arg_base,generic_editors)
+  })
 
   setInterval(function() {
-    generic_editors.update(true)
+    generic_editors.doUpdate(true)
 
     if( !admin ) { 
       for(var key in tables) {
