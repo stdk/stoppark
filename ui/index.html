@@ -1,24 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/css/smoothness/jquery-ui-1.8.17.custom.css" >
-<link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/datatables/css/demo_table_jui.css" >
-<title>Stop-Park</title>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/css/smoothness/jquery-ui-1.8.17.custom.css" >
+  <link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/datatables/css/demo_table_jui.css" >
+  <title>Stop-Park</title>
+
 <style>
-/*.del {
- display: inline-block;
- width: 15px;
- height: 15px;
- background-image: url(http://${host}/stoppark/ui/img/delete-icon.png);
- background-size: contain;
- background-repeat:no-repeat;
-}*/
-
-.del {
-  color: red;
-}
-
 #tabs {
  clear: both;
  border: none;
@@ -40,10 +29,6 @@ table * {
   font-size: 11px;
 }
 
-/*#status * {
-  font-size: 14px;
-}*/
-
 #userinfo {
   text-align: right;
   
@@ -57,14 +42,6 @@ table * {
 .user {
   background-color: #FFFF99;
 }
-
-/*#user {
-	position: absolute;
-	right: 0px;
-	top: 0px;
-	z-index: 1000;
-}*/
-
 </style>
 
 </head>
@@ -166,13 +143,12 @@ table * {
  <thead>
   <tr>
    <th>Оплата</th>
+   <th>Талон</th>
    <th>Тариф</th>
    <th>Касса</th>
    <th>Оператор</th>
    <th>Время</th>
-   <th>Талон</th>
    <th>Статус</th>
-   <th>Тип тарифа</th>
    <th>Цена</th>
    <th>Единиц</th>
    <th>Въезд</th>
@@ -257,8 +233,6 @@ table * {
    <th>Примечание</th>     
   </tr>
  </thead>
- <tbody>
- </tbody>
  </table> 
 
 <div style="clear:both">
@@ -277,8 +251,6 @@ table * {
    <th>Значение</th>
  </tr>
  </thead>
- <tbody>
- </tbody>
 </table> 
 
 <div style="clear:both">

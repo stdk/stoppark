@@ -147,12 +147,26 @@ class Payment(Model):
  DTime = TextField() 
  TalonID = TextField()
  Status = IntField()
- TarifType = IntField()
+ TarifType = IntField(visible=False)
  Tarif = IntField()
  TarifKol = IntField()
  DTIn = TextField()
  DTOut = TextField()
  Summa = IntField()
+
+class PaymentView(Model):
+ Payment = TextField()
+ TalonID = TextField()
+ Type = IntField()
+ Kassa = IntField()
+ Operator = TextField()
+ DTime = TextField() 
+ Status = IntField()
+ Tarif = IntField()
+ TarifKol = IntField()
+ DTIn = TextField()
+ DTOut = TextField()
+ Summa = IntField() 
 
 class Events(Model):
  def __init__(self):
