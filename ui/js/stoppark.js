@@ -61,6 +61,10 @@ function initTable(selector,path,args) {
         $(this).data('value',value)
       }
 
+      if('data' in settings && value in settings.data) {
+        value = settings.data[value]
+      }
+
       var aPos = table.fnGetPosition( this )
       table.fnUpdate( value, aPos[0], aPos[1], false )
       $(this).css('font-weight','bold')
@@ -85,8 +89,6 @@ function initTable(selector,path,args) {
     }
 
     var draw_callback = function() {
-      console.log('draw_callback')
-
       for(var child in editors) {
         var editor = editors[child]
         var elements = $(selector + ' tbody td:nth-child(' + child +')')        
@@ -406,7 +408,7 @@ $(document).ready(function() {
 
     if( !admin ) { 
       for(var key in tables) {
-        tables[key].fnReloadAjax()
+        tables[key].fnReloadAjax(null,null,true)
       }
     } else {
       sendCommand('/gstatus/update',{},function() {
@@ -418,15 +420,15 @@ $(document).ready(function() {
       })
    
       sendCommand('/ticket/update',{},function() {
-        tables.tickets.fnReloadAjax()
+        tables.tickets.fnReloadAjax(null,null,true)
       })
 
       sendCommand('/events/update',{},function() {
-        tables.events.fnReloadAjax()
+        tables.events.fnReloadAjax(null,null,true)
       })
 
       sendCommand('/payment/update',{},function() {
-        tables.payments.fnReloadAjax()
+        tables.payments.fnReloadAjax(null,null,true)
       })
     }
   },8000)
