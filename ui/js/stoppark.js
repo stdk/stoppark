@@ -165,7 +165,7 @@ function initTable(selector,path,args) {
         bJQueryUI: true,
         sAjaxSource: path + '/data',
         sPaginationType: 'full_numbers' ,
-        aoColumnDefs: [],
+        aaSorting: [],
         bDeferRender: true,
 
 /*

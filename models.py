@@ -89,6 +89,19 @@ class Ticket(Model):
  TimeDopl = TextField()
  Status = IntField()
 
+class TicketView(Model):
+ id = IntField()
+ BAR = TextField()
+ TypeTarif = IntField()
+ PriceTarif = IntField()
+ Summ = IntField()
+ SummDopl = IntField()
+ TimeIn = TextField()
+ TimeOut = TextField()
+ TimeCount = TextField()
+ TimeDopl = TextField()
+ Status = IntField()
+
 class Config(Model):
  def __init__(self):
   self.Config = 'Config'
@@ -180,6 +193,14 @@ class Events(Model):
  Direction = TextField()
  Reason = TextField()
  FreePlaces = IntField()
+
+class EventsView(Model):
+ EventName = TextField()
+ DateTime = TextField()
+ Terminal = IntField()
+ Direction = TextField()
+ Reason = TextField()
+ FreePlaces = IntField() 
 
 if __name__ == "__main__":
   from sys import argv

@@ -245,8 +245,7 @@ class MetaModel(type):
   return MetaModel.objects_from_query(cls,query)  
 
  @staticmethod
- def data_provider(cls,**kw):
-  invert = kw.get('invert')
+ def data_provider(cls,invert=False):
   if invert: return InvertModelDataProvider(cls)
   else: return ModelDataProvider(cls)
 
