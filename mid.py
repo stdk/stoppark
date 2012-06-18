@@ -29,7 +29,7 @@ class SQLHandler(dispatcher_with_send):
    try:
     cursor.execute(data.decode('cp1251'))
     answer = '\n'.join( '|'.join( str(field) for field in row ) for row in cursor )
-    self.send(unicode(answer).encode('cp1251')) if answer else self.send('NONE')
+    self.send(answer.decode('utf-8').encode('cp1251')) if answer else self.send('NONE')
     connection.commit()
    except Exception as ex:
     print ex
