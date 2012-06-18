@@ -124,10 +124,11 @@ function initTable(selector,path,args) {
         }
       }
  
-      if('delete' in args && args['delete']) {
+      if('delete' in args && args.delete) {
+        var action = {true: 'prepend', prepend: 'prepend', replace: 'html'}[args.delete]
         var button_template = '<input type="button" style="padding: 0px;width: 16px;height:16px" value="X" />&nbsp;'
-        $(selector + ' tbody td:first-child').not(':has(input)').prepend(button_template)
-        $(selector + ' tbody td:first-child input').button().click(function() {
+        var button_elements = $(selector + ' tbody td:first-child').not(':has(input)')[action](button_template).find('input')
+        button_elements.button().click(function() {        
           var element = this.parentNode
           jConfirm({
             message : 'Удалить ' + $(this.parentNode).text().substring(1) + '?',
@@ -139,9 +140,6 @@ function initTable(selector,path,args) {
                 data: { row: row },
                 success: function() {
                   table.fnReloadAjax()
-                  /*$(element.parentNode).hide('highlight',{},1000,function() {
-                    table.fnReloadAjax();
-                  })*/                      
                 },
                 error : function(jqXHR, textStatus, errorThrown) { 
                   alert('Невозможно выполнить операцию: ' + errorThrown);
@@ -331,7 +329,7 @@ var init = {
     var events = { type: 'select', data: { 'moving' :'Проезд','opening':'Открытие', 'unknown':'Неизвестно' } }
     var direction = { type: 'select', data: { 'into'   :'Въезд', 'outfrom':'Выезд' } }
     var reason = { type: 'select', data: { 'auto'   :'Автоматический', 'manual' :'Ручной' } }
-    var editors = { 1: events, 4: direction, 5: reason }
+    var editors = { 1: events, 3: generic.terminal, 4: direction, 5: reason }
     return initTable('#events','/events',$.extend({editors: editors},arg_base,{delete: false, jEditable: false}))
   },
 
@@ -346,6 +344,11 @@ var init = {
 
     var editors = { 1: payments, 3: generic.tariff, 7: generic.status, 8: generic.price, 12: generic.price }
     return initTable('#payment','/payment',$.extend({editors: editors},arg_base,{delete: false, jEditable: false}))
+  },
+
+  terminals: function(arg_base,generic) {
+    var editors = { 2: generic.text, 3: generic.text }
+    return initTable('#terminals','/terminal',$.extend({editors: editors},arg_base,{ delete: 'replace' }))
   }
 }
 
@@ -383,8 +386,11 @@ $(document).ready(function() {
              reverse_transform: function(value) { return (parseFloat('0'+value)*100).toString() }
     },
 
+    terminal: {type: 'select', data: {} },
+
     doUpdate: function(async) {
       this.tariff.data = getForeignKeyData('/tariff/data',{ i: 0, j: 1, async: async })
+      this.terminal.data = getForeignKeyData('/terminal/data',{i: 1, j: 2, async: async})
     }
   }
 
@@ -398,7 +404,8 @@ $(document).ready(function() {
            tariffs:  true,                                              
            config:   true,
            payments: true,
-           events:   true
+           events:   true,
+           terminals:true,
   },function(key,value) {
     if(value) tables[key] = init[key](arg_base,generic_editors)
   })
@@ -431,6 +438,6 @@ $(document).ready(function() {
         tables.payments.fnReloadAjax(null,null,true)
       })
     }
-  },8000)
+  },10000)
 
 })

@@ -156,7 +156,7 @@ def register_handler(path,handler):
  get_handlers[path] = handler.handle_get
  post_handlers[path] = handler.handle_post
 
-class RequestHandler(BaseRequestHandler):  
+class RequestHandler(BaseRequestHandler):
  def handle_request(self,handlers):
   path,query_string = self.parse_path()
   self.aPath = path.split('/')[1:]

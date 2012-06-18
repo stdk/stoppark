@@ -202,6 +202,11 @@ class EventsView(Model):
  Reason = TextField()
  FreePlaces = IntField() 
 
+class Terminal(Model):
+ id = IntField(primary_key=True)
+ terminal_id = IntField() 
+ title = TextField()
+
 if __name__ == "__main__":
   from sys import argv
   [ eval(arg) for arg in argv[1:] ]
