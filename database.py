@@ -1,33 +1,27 @@
 from sqlite3 import connect as sqlite3_connect
-
-class DataStructure(object):
- def array(self,**kw):
-  return [str(getattr(self,attr)) for attr in self.attributes]
- def setattr(self,**kwargs):
-  value = kwargs['value']
-
-  idx = kwargs.get('idx')
-  if idx: setattr(self,self.attributes[idx],value)
-
-  name = kwargs.get('name')
-  if name: setattr(self,name,value)
-
- def setattr_idx(self,idx,value):
-  setattr(self,self.attributes[idx],value)
- def setattr_name(self,name,value):
-  if name in self.attributes: setattr(self,name,value)
+from threading import current_thread
 
 class Connection(object):
  def __init__(self,filename):
-  self.connection = sqlite3_connect(filename)
-  self.connection.text_factory = str
-  self._cursor = self.connection.cursor()
+  self.filename = filename
+  self.connections = {}
 
  def cursor(self):
-  return self._cursor
+  thread = current_thread()
+  if thread in self.connections:
+    connection,cursor = self.connections[thread]
+    return cursor
+  else:
+    connection = sqlite3_connect(self.filename)
+    connection.text_factory = str
+    cursor = connection.cursor()
+    self.connections[thread] = (connection,cursor)
+    return cursor
 
  def commit(self):
-  return self.connection.commit()
+  thread = current_thread()
+  connection,cursor = self.connections[thread]
+  connection.commit()  
 
 class ModelDataProvider(object):
  def __init__(self,cls):
@@ -198,6 +192,3 @@ class RealField(Field):
 class Model(object):
  __metaclass__ = MetaModel
  connection = Connection('data/db.db3')
-
-
-
