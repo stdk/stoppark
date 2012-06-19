@@ -3,7 +3,6 @@ import logging
 from commands import getoutput
 from BaseHTTPServer import HTTPServer,BaseHTTPRequestHandler
 from cgi import FieldStorage
-from httplib import HTTPConnection
 from string import Template
 from base64 import b64decode,b64encode
 from hashlib import md5
@@ -47,7 +46,6 @@ class AuthZoneFixed(object):
  def value(self):
   return self._value
 
-#AUTH_ZONE = AuthZone('STOPPARK',10)
 AUTH_ZONE = AuthZoneFixed('STOPPARK')
 
 def use_template(name,parameters):
@@ -58,37 +56,44 @@ class BaseRequestHandler(BaseHTTPRequestHandler):
   log_format = '%s ' + format
   log_args = ( self.address_string(), ) + args
   logging.info(log_format % log_args)
+
+ def end_headers_ext(self,content_length=0):
+  #self.send_header('Content-Length',str(content_length))
+  # self.send_header('Connection','Keep-Alive')
+  self.end_headers()
+
  def not_found(self):
   self.send_response(NOT_FOUND)
-  self.send_header('Content-type','text/plain')
-  self.end_headers()
-  self.wfile.write('Not found')
+  self.end_headers_ext()
  
  def bad_request(self):
   self.send_response(BAD_REQUEST)
-  self.end_headers()
+  self.end_headers_ext()
  
- def ok(self,content_type):
+ def ok(self,content_type,data=''):
   self.send_response(OK)
   self.send_header('Content-type',content_type)
-  self.end_headers()
+  self.end_headers_ext(len(data))
+  self.wfile.write(data)
   
  def auth(self,realm):
   self.send_response(UNAUTHORIZED)
   self.send_header('WWW-Authenticate','Basic realm="%s"' % (realm))
-  self.end_headers()
+  self.end_headers_ext()
 
  def error(self,exception):
   logging.error('%s: %s' % (exception.__class__.__name__,exception))
   self.send_response(BAD_REQUEST)
   self.send_header('Content-type','text/html')
-  self.end_headers()
+  self.send_header('Content-Length',"0")
+  self.send_header('Connection','Keep-Alive')
+  self.end_headers_ext()
   
  def redirect(self,path):
   self.send_response(FOUND)
   location = 'http://%s:%s%s' % (HOST,PORT,path)
   self.send_header('Location',location)
-  self.end_headers()
+  self.end_headers_ext()
  
  def parse_path(self):
   pure_path,query_string = (self.path+'?').split('?')[:2]
@@ -145,9 +150,9 @@ def index(self):
  access = access_check(self)
  if not access[0]: return self.auth(AUTH_ZONE.value())
  
- self.ok('text/html')
  args = { 'host' : HOST, 'user' : access[1], 'level' : {1:'Пользователь',2:'Администратор'}[access[0]] }
- self.wfile.write(Template(open(TEMPLATES_FOLDER+'/index.html').read()).substitute(**args))
+ page = Template(open(TEMPLATES_FOLDER+'/index.html').read()).substitute(**args)
+ self.ok('text/html',page)
 
 get_handlers = { '' : index,'auth' : auth, 'version' : version }
 post_handlers = {}
@@ -157,6 +162,11 @@ def register_handler(path,handler):
  post_handlers[path] = handler.handle_post
 
 class RequestHandler(BaseRequestHandler):
+ def __init__(self,*args,**kw):
+  BaseRequestHandler.__init__(self,*args,**kw)
+  # super(RequestHandler, self).__init__(*args, **kw)
+  self.protocol_version = 'HTTP/1.1'
+
  def handle_request(self,handlers):
   path,query_string = self.parse_path()
   self.aPath = path.split('/')[1:]
@@ -172,7 +182,7 @@ class RequestHandler(BaseRequestHandler):
 
 def runserver():
  server_class = HTTPServer
- httpd = server_class((HOST, PORT), RequestHandler)
+ httpd = server_class((HOST,PORT), RequestHandler)
  logging.info('Server Starts [%s:%s]' % (HOST,PORT) )
  try:
   httpd.serve_forever()

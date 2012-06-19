@@ -26,8 +26,7 @@ class Editor(Viewer):
    row = int(post['row'].value)
    col = int(post['col'].value)  
    self.provider.setattr(row=row,idx=col,value=value) 
-   req.ok('text/html')
-   req.wfile.write(value)   
+   req.ok('text/html',value)
   except KeyError as e: req.error(e)
   except ValueError as e: req.error(e)
  
@@ -35,7 +34,7 @@ class Editor(Viewer):
  def add(self,req):
   post = req.post_query()
   self.provider.append()
-  req.ok('text/plain')
+  req.ok('text/plain','+')
 
  @access_level(2)
  def delete(self,req):
@@ -43,7 +42,7 @@ class Editor(Viewer):
   try:
    row = int(post['row'].value)
    self.provider.delete(row)
-   req.ok('text/plain')
+   req.ok('text/plain','+')
   except TypeError as e: req.error(e) 
   except KeyError as e: req.error(e)
 
@@ -51,12 +50,12 @@ class Editor(Viewer):
  def save(self,req):
   try:
    self.provider.save()
-   req.ok('text/plain')
+   req.ok('text/plain','+')
   except IOError as e: req.error(e)
 
  @access_level(2)
  def cancel(self,req):
   try:
    self.provider.load()
-   req.ok('text/plain')
+   req.ok('text/plain','+')
   except IOError as e: req.error(e)

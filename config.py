@@ -26,4 +26,4 @@ configdict = {
 #if hasattr(logging.config,'dictConfig'): logging.config.dictConfig(configdict)
 #else:
 FORMAT = '%(asctime)s %(name)-15s %(levelname)-8s %(message)s'
-logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+logging.basicConfig(format=FORMAT,level=logging.INFO)

@@ -12,13 +12,12 @@ class Viewer(object):
   level = access_check(req)[0]
   if not level: return req.bad_request()
 
-  req.ok('text/html')
   cached = level == 2
   aaData = dumps({'aaData': self.provider.aaData(cached) })
-  req.wfile.write(aaData)
+  req.ok('text/html',aaData)
 
  def update(self,req):
-  req.ok('text/html')
+  req.ok('text/html',"+")
   self.provider.load()
 
  def handle_request(self,req,handlers):
