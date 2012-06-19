@@ -58,7 +58,7 @@ class BaseRequestHandler(BaseHTTPRequestHandler):
   logging.info(log_format % log_args)
 
  def end_headers_ext(self,content_length=0):
-  #self.send_header('Content-Length',str(content_length))
+  # self.send_header('Content-Length',str(content_length))
   # self.send_header('Connection','Keep-Alive')
   self.end_headers()
 
@@ -162,10 +162,10 @@ def register_handler(path,handler):
  post_handlers[path] = handler.handle_post
 
 class RequestHandler(BaseRequestHandler):
- def __init__(self,*args,**kw):
-  BaseRequestHandler.__init__(self,*args,**kw)
+ # def __init__(self,*args,**kw):
+  # BaseRequestHandler.__init__(self,*args,**kw)
   # super(RequestHandler, self).__init__(*args, **kw)
-  self.protocol_version = 'HTTP/1.1'
+  # self.protocol_version = 'HTTP/1.1'
 
  def handle_request(self,handlers):
   path,query_string = self.parse_path()
