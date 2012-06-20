@@ -39,7 +39,7 @@ class Card(Model):
  CarColor = TextField()
  Status = IntField()
  TarifType = IntField()
- TarifPrice = IntField()
+ TarifPrice = IntField(visible=False)
  TarifSumm = IntField()
 
 class GStatus(Model):

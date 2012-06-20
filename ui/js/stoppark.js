@@ -154,7 +154,7 @@ function initTable(selector,path,args) {
 
   var table = $(selector).dataTable({
         oLanguage: datatablesRuLang,
-        iDisplayLength: 15,
+        iDisplayLength: 20,
         bPaginate: true,
         bLengthChange: false,
         bFilter: 'filter' in args && args.filter,
@@ -283,8 +283,6 @@ var init = {
     editors[5] = generic.date
     editors[13] = card_status
     editors[14] = generic.tariff
-    editors[15] = generic.price
-    editors[16] = generic.price
     var cards = initTable('#cards','/card',$.extend( { editors: editors },arg_base))
 
     $('#cards_filter input').autocomplete({

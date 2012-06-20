@@ -18,38 +18,42 @@ UNAUTHORIZED      = 401
 NOT_FOUND         = 404
 
 TEMPLATES_FOLDER = 'ui'
+AUTH_ZONE = 'STOPPARK'
 
-class AuthZone(object):
- @staticmethod
- def auth_zone_generator(base,period):
-  i = 0
-  while True:
-   yield (base + str(i))
-   i = (i + 1) % period
+class memoized(object):
+ '''Decorator. Caches a function's return value each time it is called.
+ If called later with the same arguments, the cached value is returned 
+ (not reevaluated).
+ '''
+ def __init__(self,func):
+  self.func = func
+  self.cache = {}
+  
+ def __call__(self, *args,**kw):
+  key = hash(str( (args,kw) ))
+  try:
+   return self.cache[key]
+  except KeyError:
+   print 'memoized call to %s' % (self.func.__name__)
+   value = self.func(*args,**kw)
+   self.cache[key] = value
+   return value
 
- def __init__(self,base,period):
-  self.generator = AuthZone.auth_zone_generator(base,period)
-  self._value = self.generator.next()
+ def __get__(self, obj, objtype):
+  '''Support instance methods.'''
+  return functools.partial(self.__call__, obj)
 
- def next(self):
-  self._value = self.generator.next()
-  return self._value
+@memoized
+def template(path,**kw):
+  return Template(open(TEMPLATES_FOLDER+path).read()).substitute(**kw)
 
- def value(self):
-  return self._value
-
-class AuthZoneFixed(object):
- def __init__(self,base):
-  self._value = base
- def next(self):
-  return self._value
- def value(self):
-  return self._value
-
-AUTH_ZONE = AuthZoneFixed('STOPPARK')
-
-def use_template(name,parameters):
- return Template().substitute(**parameters) 
+@memoized
+def access(auth_header):
+ username,password = b64decode(auth_header.split()[1]).split(':') if auth_header else ('anonymous','')
+ users = User.filter(name=username)
+ if not len(users): return (0,None)
+ user = users[0]
+ return (user.level,user.name) if user.password == b64encode(md5(password).digest()) else(0,None)
 
 class BaseRequestHandler(BaseHTTPRequestHandler):
  def log_message(self,format,*args):
@@ -76,9 +80,10 @@ class BaseRequestHandler(BaseHTTPRequestHandler):
   self.end_headers_ext(len(data))
   self.wfile.write(data)
   
- def auth(self,realm):
+ def auth(self,realm,*args):
   self.send_response(UNAUTHORIZED)
   self.send_header('WWW-Authenticate','Basic realm="%s"' % (realm))
+  [self.send_header(key,value) for key,value in args]
   self.end_headers_ext()
 
  def error(self,exception):
@@ -104,7 +109,8 @@ class BaseRequestHandler(BaseHTTPRequestHandler):
   return dict( ( (pair+'=').split('=')[:2] for pair in s.split('&') ) )   
   
  def post_query(self):
-  return FieldStorage(fp=self.rfile,headers=self.headers,environ={'REQUEST_METHOD':'POST','CONTENT_TYPE':self.headers['Content-Type'] })
+  return FieldStorage(fp=self.rfile,headers=self.headers,
+    environ={'REQUEST_METHOD':'POST','CONTENT_TYPE':self.headers['Content-Type'] })
 
  def get_query(self):
   pure_path,query_string = self.parse_path()
@@ -116,11 +122,7 @@ def version(self):
 
 def access_check(self):
  auth_header = self.headers.get('Authorization')
- username,password = b64decode(auth_header.split()[1]).split(':') if auth_header else ('anonymous','')
- users = User.filter(name=username)
- if not len(users): return (0,None)
- user = users[0]
- return (user.level,user.name) if user.password == b64encode(md5(password).digest()) else(0,None)
+ return access(auth_header) if auth_header else (0,None)
 
 #applicable only to class members with request as a second parameter
 def access_level(level):
@@ -139,19 +141,15 @@ def auth(self):
  self.end_headers() 
 
 def index(self):
- cookie = self.headers.get("Cookie")
- if cookie == 'logout=true':
-  self.send_response(UNAUTHORIZED)
-  self.send_header("Set-Cookie","logout=false")
-  self.send_header('WWW-Authenticate','Basic realm="%s"' % (AUTH_ZONE.value()))
-  self.end_headers()
-  return
+ if self.headers.get("Cookie") == 'logout=true':
+  return self.auth(AUTH_ZONE,('Set-Cookie','logout=false'))
 
  access = access_check(self)
- if not access[0]: return self.auth(AUTH_ZONE.value())
+ if not access[0]: return self.auth(AUTH_ZONE)
  
  args = { 'host' : HOST, 'user' : access[1], 'level' : {1:'Пользователь',2:'Администратор'}[access[0]] }
- page = Template(open(TEMPLATES_FOLDER+'/index.html').read()).substitute(**args)
+ #page = Template(open(TEMPLATES_FOLDER+'/index.html').read()).substitute(**args)
+ page = template('/index.html',**args)
  self.ok('text/html',page)
 
 get_handlers = { '' : index,'auth' : auth, 'version' : version }

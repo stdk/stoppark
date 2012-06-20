@@ -21,9 +21,8 @@ class Viewer(object):
   self.provider.load()
 
  def handle_request(self,req,handlers):
-  handlers[req.aPath[0]](req)
-  #try: handlers[req.aPath[0]](req)
-  #except KeyError: req.error('KeyError')
+  try: handlers[req.aPath[0]](req)
+  except KeyError: req.not_found()
  def handle_get(self,req):
   self.handle_request(req,self.get_handlers)
  def handle_post(self,req):

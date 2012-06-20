@@ -1,22 +1,5 @@
 from sqlite3 import connect as sqlite3_connect
 
-class DataStructure(object):
- def array(self,**kw):
-  return [str(getattr(self,attr)) for attr in self.attributes]
- def setattr(self,**kwargs):
-  value = kwargs['value']
-
-  idx = kwargs.get('idx')
-  if idx: setattr(self,self.attributes[idx],value)
-
-  name = kwargs.get('name')
-  if name: setattr(self,name,value)
-
- def setattr_idx(self,idx,value):
-  setattr(self,self.attributes[idx],value)
- def setattr_name(self,name,value):
-  if name in self.attributes: setattr(self,name,value)
-
 class Connection(object):
  def __init__(self,filename):
   self.connection = sqlite3_connect(filename)
@@ -77,9 +60,7 @@ class InvertModelDataProvider(object):
   self.record.save()
   self.load()
  
- def setattr(self,**kw):
-  value = kw['value']
-  row = kw['row']
+ def setattr(self,row,idx,value):
   setattr(self.record,self.cls.visible_fields[row],value)
 
 class MetaModel(type):
@@ -93,12 +74,12 @@ class MetaModel(type):
   save_query = 'insert or replace into %s values(%s)' % (name,','.join('?' * len(fields)))
   delete_query = 'delete from %s' % (name)
 
-  dict['fields']       = fields
+  dict['fields']         = fields
   dict['visible_fields'] = visible_fields
-  dict['create_query'] = create_query
-  dict['select_query'] = select_query
-  dict['save_query']   = save_query
-  dict['delete_query'] = delete_query
+  dict['create_query']   = create_query
+  dict['select_query']   = select_query
+  dict['save_query']     = save_query
+  dict['delete_query']   = delete_query
 
   dict['create']        = classmethod(MetaModel.create)
   dict['all']           = classmethod(MetaModel.all)
@@ -156,7 +137,7 @@ class MetaModel(type):
  @staticmethod
  def filter(cls,**kw):
   clause = ' and '.join( '%s="%s"' % (key,value) for key,value in kw.iteritems() )
-  query = cls.select_query + ' where ' + clause
+  query = ' where '.join( (cls.select_query,clause) )
   return MetaModel.objects_from_query(cls,query)  
 
  @staticmethod
@@ -198,6 +179,3 @@ class RealField(Field):
 class Model(object):
  __metaclass__ = MetaModel
  connection = Connection('data/db.db3')
-
-
-
