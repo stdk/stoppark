@@ -40,7 +40,7 @@ class Card(Model):
  Status = IntField()
  TarifType = IntField()
  TarifPrice = IntField(visible=False)
- TarifSumm = IntField()
+ TarifSumm = IntField(visible=False)
 
 class GStatus(Model):
  LStatus = TextField(visible=False)
