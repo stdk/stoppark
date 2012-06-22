@@ -1,7 +1,4 @@
-#!/bin/python
 # -*- coding: utf8 -*-
-import config
-
 from viewer import Viewer
 from editor import Editor
 from http import register_handler,runserver

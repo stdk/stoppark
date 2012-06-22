@@ -1,29 +1,20 @@
 from json import dumps
-from http import access_check
+from http import access_check,access_level
 
 class Viewer(object):
  def __init__(self,provider):
   self.provider = provider
   provider.load()
-  self.get_handlers = { 'data' : self.get_data }
-  self.post_handlers = { 'update' : self.update }
+  self.handlers = { 
+   'GET'  : { 'data' : self.get_data },
+   'POST' : { 'update' : self.update }
+   }
 
- def get_data(self,req):
-  level = access_check(req)[0]
-  if not level: return req.bad_request()
+ def get_data(self,request):
+  aaData = dumps({'aaData': self.provider.aaData(True) })
+  return request.ok([request.content_type['html']],aaData)
 
-  cached = level == 2
-  aaData = dumps({'aaData': self.provider.aaData(cached) })
-  req.ok('text/html',aaData)
-
- def update(self,req):
-  req.ok('text/html',"+")
+ @access_level(2)
+ def update(self,request):
   self.provider.load()
-
- def handle_request(self,req,handlers):
-  try: handlers[req.aPath[0]](req)
-  except KeyError: req.not_found()
- def handle_get(self,req):
-  self.handle_request(req,self.get_handlers)
- def handle_post(self,req):
-  self.handle_request(req,self.post_handlers)
+  return request.ok()

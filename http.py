@@ -1,7 +1,6 @@
 # -*- coding: utf8 -*-
-import logging
+from gevent.wsgi import WSGIServer
 from commands import getoutput
-from BaseHTTPServer import HTTPServer,BaseHTTPRequestHandler
 from cgi import FieldStorage
 from string import Template
 from base64 import b64decode,b64encode
@@ -10,12 +9,6 @@ from models import User
 
 HOST = getoutput("/sbin/ifconfig").split("\n")[1].split()[1][5:]
 PORT = 2000
-
-OK                = 200
-FOUND             = 302
-BAD_REQUEST       = 400
-UNAUTHORIZED      = 401
-NOT_FOUND         = 404
 
 TEMPLATES_FOLDER = 'ui'
 AUTH_ZONE = 'STOPPARK'
@@ -55,73 +48,8 @@ def access(auth_header):
  user = users[0]
  return (user.level,user.name) if user.password == b64encode(md5(password).digest()) else(0,None)
 
-class BaseRequestHandler(BaseHTTPRequestHandler):
- def log_message(self,format,*args):
-  log_format = '%s ' + format
-  log_args = ( self.address_string(), ) + args
-  logging.info(log_format % log_args)
-
- def end_headers_ext(self,content_length=0):
-  # self.send_header('Content-Length',str(content_length))
-  # self.send_header('Connection','Keep-Alive')
-  self.end_headers()
-
- def not_found(self):
-  self.send_response(NOT_FOUND)
-  self.end_headers_ext()
- 
- def bad_request(self):
-  self.send_response(BAD_REQUEST)
-  self.end_headers_ext()
- 
- def ok(self,content_type,data=''):
-  self.send_response(OK)
-  self.send_header('Content-type',content_type)
-  self.end_headers_ext(len(data))
-  self.wfile.write(data)
-  
- def auth(self,realm,*args):
-  self.send_response(UNAUTHORIZED)
-  self.send_header('WWW-Authenticate','Basic realm="%s"' % (realm))
-  [self.send_header(key,value) for key,value in args]
-  self.end_headers_ext()
-
- def error(self,exception):
-  logging.error('%s: %s' % (exception.__class__.__name__,exception))
-  self.send_response(BAD_REQUEST)
-  self.send_header('Content-type','text/html')
-  self.send_header('Content-Length',"0")
-  self.send_header('Connection','Keep-Alive')
-  self.end_headers_ext()
-  
- def redirect(self,path):
-  self.send_response(FOUND)
-  location = 'http://%s:%s%s' % (HOST,PORT,path)
-  self.send_header('Location',location)
-  self.end_headers_ext()
- 
- def parse_path(self):
-  pure_path,query_string = (self.path+'?').split('?')[:2]
-  return pure_path,query_string 
-  
- @staticmethod 
- def parse_query_string(s):
-  return dict( ( (pair+'=').split('=')[:2] for pair in s.split('&') ) )   
-  
- def post_query(self):
-  return FieldStorage(fp=self.rfile,headers=self.headers,
-    environ={'REQUEST_METHOD':'POST','CONTENT_TYPE':self.headers['Content-Type'] })
-
- def get_query(self):
-  pure_path,query_string = self.parse_path()
-  return self.parse_query_string(query_string)
-
-def version(self):
- self.ok('text/plain')
- self.wfile.write('0.4.2')
-
-def access_check(self):
- auth_header = self.headers.get('Authorization')
+def access_check(request):
+ auth_header = request.env.get('HTTP_AUTHORIZATION',None)
  return access(auth_header) if auth_header else (0,None)
 
 #applicable only to class members with request as a second parameter
@@ -133,58 +61,98 @@ def access_level(level):
   return wrapper
  return decorator
 
-def auth(self):
- self.send_response(FOUND)
- self.send_header("Set-Cookie","logout=true")
- location = 'http://%s:%s%s' % (HOST,PORT,'')
- self.send_header('Location',location)
- self.end_headers() 
+def auth(request):
+ location = 'http://{0}:{1}/'.format(HOST,PORT)
+ request.start_response(request.FOUND,[
+  ('Set-Cookie','logout=true'),
+  ('Location',location)
+ ])
+ return ''
 
-def index(self):
- if self.headers.get("Cookie") == 'logout=true':
-  return self.auth(AUTH_ZONE,('Set-Cookie','logout=false'))
+def index(request):
+ if request.env.get('HTTP_COOKIE','') == 'logout=true':
+  return request.auth(AUTH_ZONE,[('Set-Cookie','logout=false')])
 
- access = access_check(self)
- if not access[0]: return self.auth(AUTH_ZONE)
- 
+ access = access_check(request)
+ if not access[0]: return request.auth(AUTH_ZONE)
+
+ request.start_response(request.OK,[request.content_type['html']])
  args = { 'host' : HOST, 'user' : access[1], 'level' : {1:'Пользователь',2:'Администратор'}[access[0]] }
- #page = Template(open(TEMPLATES_FOLDER+'/index.html').read()).substitute(**args)
- page = template('/index.html',**args)
- self.ok('text/html',page)
+ return [template('/index.html',**args)]
 
-get_handlers = { '' : index,'auth' : auth, 'version' : version }
-post_handlers = {}
+class Request(object):
+ OK           = '200 OK'
+ FOUND        = '302 Found'
+ BAD_REQUEST  = '400 Bad Request'
+ UNAUTHORIZED = '401 Unauthorized'
+ NOT_FOUND    = '404 Not Found'
+ NOT_ALLOWED  = '405 Method not allowed'
+ SERVER_ERROR = '500 Internal Server Error'
 
-def register_handler(path,handler):
- get_handlers[path] = handler.handle_get
- post_handlers[path] = handler.handle_post
+ content_type = {
+  'html' : ('Content-Type', 'text/html; charset=utf-8'),
+  'json' : ('Content-Type', 'application/json; charset=utf-8'),
+  'plain': ('Content-Type', 'text/plain; charset=utf-8')
+ }
 
-class RequestHandler(BaseRequestHandler):
- # def __init__(self,*args,**kw):
-  # BaseRequestHandler.__init__(self,*args,**kw)
-  # super(RequestHandler, self).__init__(*args, **kw)
-  # self.protocol_version = 'HTTP/1.1'
+ def __init__(self,env,start_response):
+  self.env = env
+  self.start_response = start_response
 
- def handle_request(self,handlers):
-  path,query_string = self.parse_path()
-  self.aPath = path.split('/')[1:]
-  handler = handlers.get(self.aPath[0],BaseRequestHandler.not_found)
-  self.aPath = self.aPath[1:]
-  handler(self)
+ def post_query(self):
+  return FieldStorage(fp=self.env['wsgi.input'],headers={'Content-Length': self.env['CONTENT_LENGTH']},
+    environ={'REQUEST_METHOD':'POST','CONTENT_TYPE':self.env['CONTENT_TYPE'] })
 
- def do_GET(self):
-  self.handle_request(get_handlers)
+ def auth(self,realm,ext_headers=[]):
+  headers = [('WWW-Authenticate','Basic realm="{0}"'.format(realm))]
+  self.start_response(self.UNAUTHORIZED,headers + ext_headers)
+  return []
 
- def do_POST(self):
-  self.handle_request(post_handlers)
+ def not_found(self):
+  self.start_response(self.NOT_FOUND,[])
+  return []
 
+ def method_not_allowed(self):
+  self.start_response(self.NOT_ALLOWED,[])
+  return []
+
+ def bad_request(self,exception):
+  self.start_response(self,BAD_REQUEST,[self.content_type['plain']])
+  return [str(exception)] 
+
+ def server_error(self,exception):
+  self.start_response(self,SERVER_ERROR,[self.content_type['plain']])
+  return [str(exception)] 
+
+ def ok(self,headers=[],data=''):
+  self.start_response(self.OK,headers)
+  return [data]
+
+handlers = {
+  'GET' : {'/' : index, '/auth' : auth},
+  'POST': {}  
+}
+
+def transform_handlers(path,handlers):
+ return dict( (
+  method,
+  dict( ('/{0}/{1}'.format(path,name),handler)
+        for name,handler in method_handlers.iteritems() )
+ ) for method,method_handlers in handlers.iteritems() )
+
+def register_handler(path,obj):
+ obj_handlers = transform_handlers(path,obj.handlers)
+ [ handlers[method].update(obj_method_handlers)
+   for method,obj_method_handlers in obj_handlers.iteritems() ]
+
+def application(env, start_response):
+ request = Request(env,start_response)
+ method_handlers = handlers.get(env['REQUEST_METHOD'],None)
+ if not method_handlers:
+  return request.method_not_allowed()
+ handler = method_handlers.get(env['PATH_INFO'],Request.not_found)
+ return handler(request)
+ 
 def runserver():
- server_class = HTTPServer
- httpd = server_class((HOST,PORT), RequestHandler)
- logging.info('Server Starts [%s:%s]' % (HOST,PORT) )
- try:
-  httpd.serve_forever()
- except KeyboardInterrupt:
-  pass
- httpd.server_close()
- logging.info('Server Stops [%s:%s]' % (HOST,PORT) )
+ print 'Serving on {0}:{1}...'.format(HOST,PORT)
+ WSGIServer((HOST, PORT), application).serve_forever()
