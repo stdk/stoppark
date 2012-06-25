@@ -100,8 +100,7 @@ class Request(object):
   self.start_response = start_response
 
  def post_query(self):
-  return FieldStorage(fp=self.env['wsgi.input'],headers={'Content-Length': self.env['CONTENT_LENGTH']},
-    environ={'REQUEST_METHOD':'POST','CONTENT_TYPE':self.env['CONTENT_TYPE'] })
+  return FieldStorage(fp=self.env['wsgi.input'],environ=self.env)
 
  def auth(self,realm,ext_headers=[]):
   headers = [('WWW-Authenticate','Basic realm="{0}"'.format(realm))]
@@ -117,12 +116,12 @@ class Request(object):
   return []
 
  def bad_request(self,exception):
-  self.start_response(self,BAD_REQUEST,[self.content_type['plain']])
-  return [str(exception)] 
+  self.start_response(self.BAD_REQUEST,[self.content_type['plain']])
+  return [repr(exception)] 
 
  def server_error(self,exception):
-  self.start_response(self,SERVER_ERROR,[self.content_type['plain']])
-  return [str(exception)] 
+  self.start_response(self.SERVER_ERROR,[self.content_type['plain']])
+  return [repr(exception)] 
 
  def ok(self,headers=[],data=''):
   self.start_response(self.OK,headers)
@@ -136,7 +135,7 @@ handlers = {
 def transform_handlers(path,handlers):
  return dict( (
   method,
-  dict( ('/{0}/{1}'.format(path,name),handler)
+  dict( ('{0}/{1}'.format(path,name),handler)
         for name,handler in method_handlers.iteritems() )
  ) for method,method_handlers in handlers.iteritems() )
 
@@ -155,4 +154,4 @@ def application(env, start_response):
  
 def runserver():
  print 'Serving on {0}:{1}...'.format(HOST,PORT)
- WSGIServer((HOST, PORT), application).serve_forever()
+ WSGIServer((HOST, PORT), application,log=None).serve_forever()

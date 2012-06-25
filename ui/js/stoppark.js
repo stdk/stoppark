@@ -46,7 +46,6 @@ function sendCommand(path,args,success) {
   })
 }
 
-
 function initTable(selector,path,args) {
 
   var draw_callback = function() {}
@@ -164,24 +163,9 @@ function initTable(selector,path,args) {
         bProcessing: true,
         bJQueryUI: true,
         sAjaxSource: path + '/data',
-        sPaginationType: 'full_numbers' ,
+        sPaginationType: 'full_numbers',
         aaSorting: [],
         bDeferRender: true,
-
-/*
-        aoColumnDefs: [ 
-            {
-                "fnRender": function ( oObj, sVal ) {
-                    return oObj.aData[0];
-                },
-                "aTargets": [ 0 ]
-            },
-            { sWidth: '10px', aTargets: [0] }
-            //{ "bVisible": false,  "aTargets": [ 3 ] },
-            //{ "sClass": "center", "aTargets": [ 4 ] }
-        ],
-*/
-        //sDom : 'fltrip',
         fnDrawCallback: draw_callback
   });
 
@@ -415,26 +399,12 @@ $(document).ready(function() {
       for(var key in tables) {
         tables[key].fnReloadAjax(null,null,true)
       }
-    } else {
-      sendCommand('/gstatus/update',{},function() {
-        tables.gstatus.fnReloadAjax()
-      })
-
-      sendCommand('/lstatus/update',{},function() {
-        tables.lstatus.fnReloadAjax()
-      })
-   
-      sendCommand('/ticket/update',{},function() {
-        tables.tickets.fnReloadAjax(null,null,true)
-      })
-
-      sendCommand('/events/update',{},function() {
-        tables.events.fnReloadAjax(null,null,true)
-      })
-
-      sendCommand('/payment/update',{},function() {
-        tables.payments.fnReloadAjax(null,null,true)
-      })
+    } else { //update only tables that we cannot edit in admin interface, i.e. readonly tables 
+      tables.gstatus.fnReloadAjax()
+      tables.lstatus.fnReloadAjax()
+      tables.tickets.fnReloadAjax(null,null,true)
+      tables.events.fnReloadAjax(null,null,true)
+      tables.payments.fnReloadAjax(null,null,true)
     }
   },10000)
 

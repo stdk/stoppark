@@ -1,21 +1,17 @@
-import logging
 from viewer import Viewer
 from http import access_level
 
 class Editor(Viewer):
  def __init__(self,provider):
-  self.provider = provider
-  self.provider.load()
+  super(Editor,self).__init__(provider,cache = True)
 
-  self.handlers = {
-   'GET'  : { 'data'   : self.get_data },
-   'POST' : { 'edit'   : self.edit,
-              'add'    : self.add,
-              'delete' : self.delete,
-              'save'   : self.save,
-              'cancel' : self.cancel,
-              'update' : self.update }
-  }
+  self.handlers['POST'].update({
+   'edit'   : self.edit,
+   'add'    : self.add,
+   'delete' : self.delete,
+   'save'   : self.save,
+   'cancel' : self.cancel,
+  })
 
  @access_level(2)
  def edit(self,request):

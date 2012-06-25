@@ -1,20 +1,15 @@
 from json import dumps
-from http import access_check,access_level
 
 class Viewer(object):
- def __init__(self,provider):
+ def __init__(self,provider,cache = False):
   self.provider = provider
+  self.cache = cache
   provider.load()
   self.handlers = { 
    'GET'  : { 'data' : self.get_data },
-   'POST' : { 'update' : self.update }
+   'POST' : {}
    }
 
  def get_data(self,request):
-  aaData = dumps({'aaData': self.provider.aaData(True) })
+  aaData = dumps({'aaData': self.provider.aaData(self.cache) })
   return request.ok([request.content_type['html']],aaData)
-
- @access_level(2)
- def update(self,request):
-  self.provider.load()
-  return request.ok()
