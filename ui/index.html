@@ -97,6 +97,7 @@ table * {
   <li><a href="#tab-tickets">Талоны</a></li>
   <li><a href="#tab-tariffs">Тарифы</a></li>
   <li><a href="#tab-config">Конфигурация</a></li>
+  <li><a href="#tab-user">Пользователи</a></li>
   <li><a href="#tab-terminals">Терминалы</a></li>
   <li><a href="#tab-reports">Отчёты</a></li>
 </ul>
@@ -259,12 +260,32 @@ table * {
 
 </div>
 
+<div id="tab-user">
+ <table id="users" cellpadding="0" cellspacing="0" border="0" class="display">
+ <thead>
+  <tr>
+   <th>#</th>
+   <th>Логин</th>
+   <th>Пароль</th>
+   <th>Уровень доступа</th>
+ </tr>
+ </thead>
+</table> 
+
+<div style="clear:both">
+  <button id="users-row-add">Добавить терминал</button>
+  <button id="users-save-changes">Подтвердить изменения</button>
+  <button id="users-cancel-changes">Отменить изменения</button>
+</div>
+
+</div>
+
 <div id="tab-terminals">
  <table id="terminals" cellpadding="0" cellspacing="0" border="0" class="display">
  <thead>
   <tr>
-   <th style="width: 30px"></th>
-   <th style="width: 60px">№</th>
+   <th style="width: 40px"></th>
+   <th style="width: 70px">№</th>
    <th>Название</th>     
  </tr>
  </thead>

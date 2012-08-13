@@ -1,4 +1,5 @@
 from sqlite3 import connect as sqlite3_connect
+from itertools import izip
 
 class Connection(object):
  def __init__(self,filename):
@@ -92,9 +93,16 @@ class MetaModel(type):
   return type.__new__(cls, name, bases, dict)
 
  def __call__(cls,*args,**kw):
+  '''
+  MetaClass constructor for all derived classes 
+  Supports 3-step field initialization:
+  1. Normal class constructor initialization.
+  2. Initializing fields via keyword arguments (**kw) using setattr.
+  3. Initializing fields using *args (array of (key,value) tuples) directly to object __dict__
+  '''
   obj = super(MetaModel, cls).__call__()
   [ setattr(obj,key,kw.get(key,None)) for key in cls.fields if key not in obj.__dict__ ]
-  [ setattr(obj,key,value) for key,value in args ]    
+  [ obj.__dict__.__setitem__(key,value) for key,value in args ]
   return obj
 
  @staticmethod
@@ -125,10 +133,10 @@ class MetaModel(type):
   cls.connection.commit()
 
  @staticmethod
- def objects_from_query(cls,query):
+ def objects_from_query(cls,query,izip=izip):
   cursor = cls.connection.cursor()
   cursor.execute(query)
-  return [ cls(*zip(cls.fields,row)) for row in cursor ]
+  return [ cls(*izip(cls.fields,row)) for row in cursor ]
 
  @staticmethod
  def all(cls):

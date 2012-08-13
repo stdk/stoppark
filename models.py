@@ -1,6 +1,7 @@
 from database import Model,TextField,IntField
-
 from time import strftime
+from hashlib import md5
+from base64 import b64encode as enc
 
 class LStatus(Model):
  LStatus = TextField(visible=False)
@@ -124,18 +125,24 @@ class Config(Model):
  UserStr8 = TextField()
 
 class User(Model):
- id = IntField(primary_key=True)
- name = TextField()
+ id       = IntField(primary_key=True)
+ name     = TextField()
  password = TextField()
- level = IntField()
+ level    = IntField()
+
+ def __setattr__(self,key,value):
+  if key == 'password' and value: value = enc(md5(value).digest())
+  object.__setattr__(self, key, value)
+
+ def __str__(self):
+  return '{0}:{1}:{2}'.format(self.name,self.password,self.level)
+ __repr__ = __str__
 
  @staticmethod
  def prepare():
-  from hashlib import md5
-  from base64 import b64encode as enc
   User.create()
-  User(name='admin',password=enc(md5('pass').digest()),level=2).save()
-  User(name='cs',password=enc(md5('sv4metro').digest()),level=1).save()
+  User(name='admin',password='pass',level=2).save()
+  User(name='cs',password='sv4metro',level=1).save()
   print User.filter(name='admin')
   print User.filter(name='cs')
   def __repr__(self):

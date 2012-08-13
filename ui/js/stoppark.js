@@ -331,6 +331,13 @@ var init = {
   terminals: function(arg_base,generic) {
     var editors = { 2: generic.text, 3: generic.text }
     return initTable('#terminals','/terminal',$.extend({editors: editors},arg_base,{ delete: 'replace' }))
+  },
+
+  users: function(arg_base,generic) {
+    var user_level = { type: 'select', data: { '1' : 'Пользователь', '2' : 'Администратор' } }
+    var password = { type: 'text',  transform: function(value) { return '***********' } }
+    var editors = { 2: generic.text, 3: password, 4: user_level }
+    return initTable('#users','/user',$.extend( { editors: editors },arg_base))
   }
 }
 
@@ -388,6 +395,7 @@ $(document).ready(function() {
            payments: true,
            events:   true,
            terminals:true,
+           users:    true
   },function(key,value) {
     if(value) tables[key] = init[key](arg_base,generic_editors)
   })
