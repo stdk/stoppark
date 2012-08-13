@@ -40,7 +40,6 @@ class memoized(object):
 def template(path,**kw):
   return Template(open(TEMPLATES_FOLDER+path).read()).substitute(**kw)
 
-@memoized
 def access(auth_header):
  username,password = b64decode(auth_header.split()[1]).split(':') if auth_header else ('anonymous','')
  users = User.filter(name=username)

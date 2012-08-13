@@ -284,12 +284,15 @@ var init = {
 
   tariffs: function(arg_base,generic_editors) {
     var text = generic_editors.text
-    var tariff_type = { type: 'select', data: { '1':'Фиксированный', '2':'Переменный', '3' : 'Разовый' }, width: "40px" }
+    var tariff_type = { type: 'select',
+                        data: { '1':'Фиксированный', '2':'Переменный', '3' : 'Разовый', '4' : 'Новый тариф' }, 
+                        width: "40px" }
     var tariff_interval = { type: 'select', data: { '1':'час', '2':'сутки', '3':'месяц' }, width: "20px" }
     var tariff_cost = { type: 'costpicker', jEditable: true, isExtended: function(row) {
       var result = false
       row.find('td:nth-child(3)').each(function(idx,cell) {
-        if( $(cell).text() == 'Переменный' ) result = true;
+        var t = $(cell).text()
+        if( t == tariff_type.data['2'] || t == tariff_type.data['4'] ) result = true;
       })    
       return result
     } }
@@ -335,7 +338,7 @@ var init = {
 
   users: function(arg_base,generic) {
     var user_level = { type: 'select', data: { '1' : 'Пользователь', '2' : 'Администратор' } }
-    var password = { type: 'text',  transform: function(value) { return '***********' } }
+    var password = $.extend({ transform: function(value) { return '***********' } }, generic.text)
     var editors = { 2: generic.text, 3: password, 4: user_level }
     return initTable('#users','/user',$.extend( { editors: editors },arg_base))
   }
