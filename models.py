@@ -5,7 +5,7 @@ from base64 import b64encode as enc
 
 class LStatus(Model):
  LStatus = TextField(visible=False)
- id = IntField(primary_key=True,visible=False)
+ id = IntField(primary_key=True)
  ReportHKol = IntField()
  ReportHSum = IntField()
  ReportDKol = IntField() 
