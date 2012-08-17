@@ -9,7 +9,7 @@ logging.config.dictConfig({
  'version': 1,    # Configuration schema in use; must be 1 for now
  'formatters': {
      'standard': {
-         'format': ('%(asctime)s %(name)-15s '
+         'format': ('%(asctime)s %(host)-15s '
                     '%(levelname)-8s %(message)s')}},
 
  'handlers': {'mid': { 'backupCount': 10,
@@ -17,7 +17,7 @@ logging.config.dictConfig({
                        'filename': 'data/mid.log',
                        'formatter': 'standard',
                        'level': 'DEBUG',
-                       'maxBytes': 1000000 }
+                       'maxBytes': 10000000 }
              },
  # Specify properties of the root logger
  'root': {
@@ -48,19 +48,20 @@ class TcpServer(dispatcher):
 class SQLHandler(dispatcher_with_send):
  def __init__(self,(sock,(host,port))):
   dispatcher_with_send.__init__(self,sock)
-  self.host = host
+  self.extra = {'host':host}
  def handle_read(self):
   data = self.recv(512)
   if data:
    try:
     query = data.decode('cp1251').strip()
-    logging.debug('Query[%s]',query)
+    logging.debug('->[%s]',query,extra=self.extra)
     cursor.execute(query)
     answer = '\n'.join( '|'.join( str(field) for field in row ) for row in cursor )
+    logging.debug("<-[%s]",answer or 'NONE',extra=self.extra)
     self.send(answer.decode('utf-8').encode('cp1251')) if answer else self.send('NONE')
     connection.commit()    
    except Exception as ex:
-    logging.error('Exception[%s][%s]',ex.__class__.__name__,ex)
+    logging.error('%s[%s]',ex.__class__.__name__,ex,extra=self.extra)
     self.send('FAIL') 
   self.close()
 
