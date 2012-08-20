@@ -24,6 +24,8 @@ class Card(Model):
  def __init__(self):
   self.Card = 'Card'
   self.DTReg = strftime('%d-%m-%y') 
+  self.Type = 2
+  self.Status = 1
 
  Card = TextField(visible=False)
  id = IntField(primary_key=True)
