@@ -1,0 +1,161 @@
+CREATE TABLE Card (
+	Card text not null default "Card",
+	ID integer primary key,
+	Type integer,
+	CardID text,
+	DTReg text,
+	DTEnd text,
+	DriveName text,
+	DriveSName text,
+	DriveFam text,
+	DrivePhone text,
+	CarGosNom text,
+	CarModel text,
+	CarColor text,
+	Status integer,
+	TarifType integer,
+	TarifPrice integer,
+	TarifSumm integer
+);
+
+CREATE TABLE Config (
+	Config text not null default "Config",
+	ID integer primary key,
+	PlaceNum integer,
+	FreeTime integer,
+	PayTime text,
+	TarifName1 text,
+	TarifName2 text,
+	TarifName3 text,
+	TarifName4 text,
+	UserStr1 text,
+	UserStr2 text,
+	UserStr3 text,
+	UserStr4 text,
+	UserStr5 text,
+	UserStr6 text,
+	UserStr7 text,
+	UserStr8 text
+);
+
+CREATE TABLE `Events` (
+	`Event` text not null default "Event",
+	`id` integer primary key,
+	`EventName`  text,
+	`DateTime` text,
+	`Terminal` integer,
+	`Direction` text,
+	`Reason` text,
+	`FreePlaces` integer
+);
+
+CREATE TABLE GStatus (
+	LStatus text not null default "GStatus",
+	ID integer primary key,
+	InCounterWhole integer,
+	InCounterYear integer,
+	InCounterMonth integer,
+	InCounterDay integer,
+	InCounterSmena integer,
+	OutCounterWhole integer,
+	OutCounterYear integer,
+	OutCounterMonth integer,
+	OutCounterDay integer,
+	OutCounterSmena integer,
+	PayedWhole integer,
+	PayedYear integer,
+	PayedMonth integer,
+	PayedDay integer,
+	PayedSmena integer,
+	PayedPost integer,
+	PayedSingle integer,
+	Year integer,
+	PlaceFree integer,
+	PlaceAll integer
+);
+
+CREATE TABLE LStatus (
+	LStatus text not null default "LStatus",
+	ID integer primary key,
+	ReportHKol integer,
+	ReportHSum integer,
+	ReportDKol integer,
+	ReportDSum integer,
+	ReportMKol integer,
+	ReportMSum integer,
+	ReportStKol integer,
+	ReportStSum integer,
+	ReportTime text,
+	ParkManLast text,
+	ParkManCur text,
+	PrintedAll integer,
+	PrintedSmena integer
+)
+;
+CREATE TABLE Payment (
+	id integer primary key,
+	Payment text,
+	Type integer,
+	Kassa integer,
+	Operator text,
+	DTime text,
+	TalonID text,
+	Status integer,
+	TarifType integer,
+	Tarif integer,
+	TarifKol integer,
+	DTIn text,
+	DTOut text,
+	Summa integer
+);
+
+CREATE TABLE Tariff (
+	id integer primary key,
+	Name text,
+	Type integer,
+	Interval integer,
+	Cost text,
+	ZeroTime text,
+	MaxPerDay text,
+	Note text
+);
+
+CREATE TABLE Terminal (
+	id integer primary key,
+	terminal_id integer,
+	title text
+);
+
+CREATE TABLE Ticket (
+	Ticket text not null default "Ticket",
+	ID integer primary key,
+	BAR text,
+	TypeTarif integer,
+	PriceTarif integer,
+	Summ integer,
+	SummDopl integer,
+	TimeIn text,
+	TimeOut text,
+	TimeCount text,
+	TimeDopl text,
+	Status integer
+);
+
+CREATE TABLE User (
+	id integer primary key,
+	name text,
+	password text,
+	level integer
+);
+
+CREATE VIEW EventsView as
+select EventName,DateTime,Terminal,Direction,Reason,FreePlaces
+from Events order by id desc limit 0,150;
+
+CREATE VIEW PaymentView as
+select Payment,TalonID,Type,Kassa,Operator,DTime,Status,Tarif,TarifKol,DTIn,DTOut,Summa 
+from Payment order by id desc limit 0,150;
+
+CREATE VIEW TicketView as
+select id,BAR,TypeTarif,PriceTarif,Summ,SummDopl,TimeIn,TimeOut,TimeCount,TimeDopl,Status 
+from Ticket order by id desc limit 0,150;
