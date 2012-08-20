@@ -138,7 +138,7 @@ function initTable(selector,path,args) {
                 url: path + '/delete',
                 data: { row: row },
                 success: function() {
-                  table.fnReloadAjax()
+                  table.fnReloadAjax(null,null,true)
                 },
                 error : function(jqXHR, textStatus, errorThrown) { 
                   alert('Невозможно выполнить операцию: ' + errorThrown);
@@ -176,7 +176,7 @@ function initTable(selector,path,args) {
         url: path + "/add",
         contentType: 'application/x-www-form-urlencoded',
         data: {},
-        success: function() { table.fnReloadAjax(); },
+        success: function() { table.fnReloadAjax(null,null,true); },
         error : function(jqXHR, textStatus, errorThrown) { 
           alert('Невозможно выполнить операцию: ' + errorThrown);
         }
@@ -192,7 +192,7 @@ function initTable(selector,path,args) {
         type: "POST",
         url: path + "/save",
         data: {},
-        success: function() { table.fnReloadAjax(); },
+        success: function() { table.fnReloadAjax(null,null,true); },
         error : function(jqXHR, textStatus, errorThrown) { 
           alert('Невозможно выполнить операцию: ' + errorThrown);
         }
@@ -208,7 +208,7 @@ function initTable(selector,path,args) {
         type: "POST",
         url: path + "/cancel",
         data: {},
-        success: function() { table.fnReloadAjax(); },
+        success: function() { table.fnReloadAjax(null,null,true); },
         error : function(jqXHR, textStatus, errorThrown) { 
           alert('Невозможно выполнить операцию: ' + errorThrown);
         }
