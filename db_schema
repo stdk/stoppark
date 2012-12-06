@@ -5,6 +5,8 @@ CREATE TABLE Card (
 	CardID text,
 	DTReg text,
 	DTEnd text,
+  DTIn text,
+  DTOut text,
 	DriveName text,
 	DriveSName text,
 	DriveFam text,

@@ -261,12 +261,13 @@ var init = {
     var card_status = { data: {'1':'разрешен','2':'утерян','3':'просрочен','4':'запрещен'}, type : 'select' }
 
     var editors = {}
-    for(var i=2;i<17;i++) editors[i] = generic.text
     editors[2] = card_type
+    editors[3] = generic.text
     editors[4] = generic.date
     editors[5] = generic.date
-    editors[13] = card_status
-    editors[14] = generic.tariff
+    for(var i=6;i<15;i++) editors[i] = generic.text
+    editors[15] = card_status
+    editors[16] = generic.tariff    
     var cards = initTable('#cards','/card',$.extend( { editors: editors },arg_base))
 
     $('#cards_filter input').autocomplete({

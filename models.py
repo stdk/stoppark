@@ -33,6 +33,8 @@ class Card(Model):
  CardID = TextField()
  DTReg = TextField()
  DTEnd = TextField()
+ DTIn = TextField()
+ DTOut = TextField()
  DriveName = TextField()
  DriveSName = TextField()
  DriveFam = TextField()
