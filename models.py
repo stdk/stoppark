@@ -218,6 +218,14 @@ class Terminal(Model):
  terminal_id = IntField() 
  title = TextField()
 
+def test_models():
+ User.all()
+ GStatus.all()
+ LStatus.all()
+ Card.all()
+ Config.all()
+ Tariff.all() 
+
 if __name__ == "__main__":
   from sys import argv
   [ eval(arg) for arg in argv[1:] ]

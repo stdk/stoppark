@@ -1,11 +1,29 @@
 from sqlite3 import connect as sqlite3_connect
 from itertools import izip
 
+DATABASE_FILENAME = 'data/db.db3'
+
 class Connection(object):
  def __init__(self,filename):
-  self.connection = sqlite3_connect(filename)
-  self.connection.text_factory = str
-  self._cursor = self.connection.cursor()
+  self.connection = None
+  self.open(filename)
+
+ def open(self,filename,replace=False):
+  if self.connection and replace: self.close()
+  if not self.connection:
+   self.connection = sqlite3_connect(filename)
+   self.connection.text_factory = str
+   self._cursor = self.connection.cursor() 
+  else:
+   print 'Connection already open'
+
+ def test(self):
+  from models import test_models
+  test_models()
+
+ def close(self):
+  if self.connection: self.connection.close()
+  self.connection = None
 
  def cursor(self):
   return self._cursor
@@ -186,4 +204,4 @@ class RealField(Field):
 
 class Model(object):
  __metaclass__ = MetaModel
- connection = Connection('data/db.db3')
+ connection = Connection(DATABASE_FILENAME)

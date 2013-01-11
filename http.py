@@ -1,10 +1,12 @@
 # -*- coding: utf8 -*-
+from tempfile import NamedTemporaryFile
 from gevent.wsgi import WSGIServer
 from commands import getoutput
 from cgi import FieldStorage
 from string import Template
 from base64 import b64decode,b64encode
 from hashlib import md5
+from database import Connection,Model,DATABASE_FILENAME
 from models import User
 
 HOST = getoutput("/sbin/ifconfig").split("\n")[1].split()[1][5:]
@@ -79,6 +81,43 @@ def index(request):
  args = { 'host' : HOST, 'user' : access[1], 'level' : {1:'Пользователь',2:'Администратор'}[access[0]] }
  return [template('/index.html',**args)]
 
+def upload(request,message = 'Выберите файл базы данных на Вашем компьютере и загрузите его на сервер:'):
+ request.start_response(request.OK,[request.content_type['html']])
+ return '''%s<form enctype="multipart/form-data" method="POST" action="/upload" >
+  <input type="file" name="file" /><input id="submit" type="submit" />
+  </form>
+  ''' % (message)
+
+def post_upload(request):
+ try:
+  new_db = request.post_query()['file']
+
+  target_filename = DATABASE_FILENAME + '.new'
+
+  if hasattr(new_db.file,'name'): 
+   from os import rename,chmod
+   rename(new_db.file.name,target_filename)
+   chmod(target_filename,0744)
+  else:
+   open(target_filename,'wb').write(new_db.file.read())
+
+  Model.connection.open(target_filename,replace=True)
+  Model.connection.test()
+  Model.connection.close()
+
+  rename(target_filename,DATABASE_FILENAME)
+
+  return upload(request,'Загрузка завершена успешно.')
+ except Exception as e:
+  print e
+  return upload(request,'Не удалось загрузить файл базы данных.') 
+ finally:
+  Model.connection.open(DATABASE_FILENAME,replace=True)
+
+class CustomFieldStorage(FieldStorage):
+ def make_file(self,binary=None):
+  return NamedTemporaryFile("w+b",dir='data',delete=False)
+
 class Request(object):
  OK           = '200 OK'
  FOUND        = '302 Found'
@@ -99,7 +138,7 @@ class Request(object):
   self.start_response = start_response
 
  def post_query(self):
-  return FieldStorage(fp=self.env['wsgi.input'],environ=self.env)
+  return CustomFieldStorage(fp=self.env['wsgi.input'],environ=self.env)
 
  def auth(self,realm,ext_headers=[]):
   headers = [('WWW-Authenticate','Basic realm="{0}"'.format(realm))]
@@ -127,8 +166,8 @@ class Request(object):
   return [data]
 
 handlers = {
-  'GET' : {'/' : index, '/auth' : auth},
-  'POST': {}  
+  'GET' : {'/' : index, '/auth' : auth, '/upload' : upload},
+  'POST': { '/upload': post_upload }  
 }
 
 def transform_handlers(path,handlers):
