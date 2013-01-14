@@ -8,7 +8,7 @@ class Connection(object):
   self.connection = None
   self.open(filename)
 
- def open(self,filename,replace=False):
+ def open(self,filename = DATABASE_FILENAME, replace = False):
   if self.connection and replace: self.close()
   if not self.connection:
    self.connection = sqlite3_connect(filename)

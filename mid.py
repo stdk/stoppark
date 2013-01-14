@@ -1,9 +1,11 @@
 from commands import getoutput
 from asyncore import dispatcher,dispatcher_with_send,loop
 from socket import AF_INET,SOCK_STREAM
-from sqlite3 import connect as sqlite3_connect
+from database import Model
 import logging
 import logging.config
+
+#ADDR = getoutput("/sbin/ifconfig").split("\n")[1].split()[1][5:] , 101
 
 logging.config.dictConfig({
  'version': 1,    # Configuration schema in use; must be 1 for now
@@ -26,11 +28,6 @@ logging.config.dictConfig({
  },
 })
 
-ADDR = getoutput("/sbin/ifconfig").split("\n")[1].split()[1][5:] , 101
-connection = sqlite3_connect('data/db.db3')
-connection.text_factory = str
-cursor = connection.cursor()
-
 class TcpServer(dispatcher):
  def __init__(self, (host, port), handler):
   dispatcher.__init__(self)
@@ -45,25 +42,47 @@ class TcpServer(dispatcher):
   pair = self.accept()
   if pair: self.handler(pair)
 
-class SQLHandler(dispatcher_with_send):
+class Handler(dispatcher_with_send):
+ BYTES_TO_RECV = 512
+ COMMAND_PREFIX = '>>>'
+
+ COMMAND_HANDLERS = {
+  'reset' : lambda: Model.connection.open(replace=True)
+ }
+
  def __init__(self,(sock,(host,port))):
   dispatcher_with_send.__init__(self,sock)
-  self.extra = {'host':host}
+  self.extra = { 'host': host }
+
+ def handle_command(self,command):
+  print 'handle_command',command
+  try:
+   self.COMMAND_HANDLERS[command]()
+   self.send('OK')
+  except Exception as ex:
+   logging.error('%s[%s]', ex.__class__.__name__, ex, extra = self.extra)
+   self.send('FAIL')
+ def handle_query(self,query):
+  try:
+   rows = Model.connection.cursor().execute(query)
+   answer = '\n'.join( '|'.join( str(field) for field in row ) for row in rows )
+   logging.debug("<-[%s]",answer or 'NONE',extra=self.extra)
+   self.send(answer.decode('utf-8').encode('cp1251')) if answer else self.send('NONE')
+   Model.connection.commit()    
+  except Exception as ex:
+   logging.error('%s[%s]', ex.__class__.__name__, ex, extra = self.extra)
+   self.send('FAIL') 
+
  def handle_read(self):
-  data = self.recv(512)
+  data = self.recv(self.BYTES_TO_RECV)
   if data:
-   try:
-    query = data.decode('cp1251').strip()
-    logging.debug('->[%s]',query,extra=self.extra)
-    cursor.execute(query)
-    answer = '\n'.join( '|'.join( str(field) for field in row ) for row in cursor )
-    logging.debug("<-[%s]",answer or 'NONE',extra=self.extra)
-    self.send(answer.decode('utf-8').encode('cp1251')) if answer else self.send('NONE')
-    connection.commit()    
-   except Exception as ex:
-    logging.error('%s[%s]',ex.__class__.__name__,ex,extra=self.extra)
-    self.send('FAIL') 
+   query = data.decode('cp1251').strip()
+   logging.debug('->[%s]', query, extra = self.extra)
+   if query.startswith(self.COMMAND_PREFIX):
+    self.handle_command(query[3:])
+   else:
+    self.handle_query(query)
   self.close()
 
-sql = TcpServer( ADDR, SQLHandler)
+sql = TcpServer( ('0.0.0.0',101), Handler)
 loop()

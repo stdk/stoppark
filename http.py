@@ -6,7 +6,6 @@ from cgi import FieldStorage
 from string import Template
 from base64 import b64decode,b64encode
 from hashlib import md5
-from database import Connection,Model,DATABASE_FILENAME
 from models import User
 
 HOST = getoutput("/sbin/ifconfig").split("\n")[1].split()[1][5:]
@@ -40,7 +39,7 @@ class memoized(object):
 
 @memoized
 def template(path,**kw):
-  return Template(open(TEMPLATES_FOLDER+path).read()).substitute(**kw)
+  return Template(open(TEMPLATES_FOLDER + path).read()).substitute(**kw)
 
 def access(auth_header):
  username,password = b64decode(auth_header.split()[1]).split(':') if auth_header else ('anonymous','')
@@ -80,39 +79,6 @@ def index(request):
  request.start_response(request.OK,[request.content_type['html']])
  args = { 'host' : HOST, 'user' : access[1], 'level' : {1:'Пользователь',2:'Администратор'}[access[0]] }
  return [template('/index.html',**args)]
-
-def upload(request,message = 'Выберите файл базы данных на Вашем компьютере и загрузите его на сервер:'):
- request.start_response(request.OK,[request.content_type['html']])
- return '''%s<form enctype="multipart/form-data" method="POST" action="/upload" >
-  <input type="file" name="file" /><input id="submit" type="submit" />
-  </form>
-  ''' % (message)
-
-def post_upload(request):
- try:
-  new_db = request.post_query()['file']
-
-  target_filename = DATABASE_FILENAME + '.new'
-
-  if hasattr(new_db.file,'name'): 
-   from os import rename,chmod
-   rename(new_db.file.name,target_filename)
-   chmod(target_filename,0744)
-  else:
-   open(target_filename,'wb').write(new_db.file.read())
-
-  Model.connection.open(target_filename,replace=True)
-  Model.connection.test()
-  Model.connection.close()
-
-  rename(target_filename,DATABASE_FILENAME)
-
-  return upload(request,'Загрузка завершена успешно.')
- except Exception as e:
-  print e
-  return upload(request,'Не удалось загрузить файл базы данных.') 
- finally:
-  Model.connection.open(DATABASE_FILENAME,replace=True)
 
 class CustomFieldStorage(FieldStorage):
  def make_file(self,binary=None):
@@ -166,8 +132,8 @@ class Request(object):
   return [data]
 
 handlers = {
-  'GET' : {'/' : index, '/auth' : auth, '/upload' : upload},
-  'POST': { '/upload': post_upload }  
+  'GET' : {'/' : index, '/auth' : auth },
+  'POST': { }  
 }
 
 def transform_handlers(path,handlers):
