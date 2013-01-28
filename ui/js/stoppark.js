@@ -245,6 +245,11 @@ function getForeignKeyData(path,args)
   return result
 }
 
+function hideTabByName(name) {
+  var tab_idx = $('#tabs ul li').index($('#tabs ul a[href="#' + name + '"]').parent())
+  $('#tabs').tabs("disable",tab_idx)
+}
+
 var init = {
   gstatus: function(arg_base,generic_editors) {
     var gstatus = initTable('#status','/gstatus',{})
@@ -338,10 +343,17 @@ var init = {
   },
 
   users: function(arg_base,generic) {
+    if(!arg_base.admin) hideTabByName('tab-user')
+
     var user_level = { type: 'select', data: { '1' : 'Пользователь', '2' : 'Администратор' } }
+    //obscure hash values from database
     var password = $.extend({ transform: function(value) { return '***********' } }, generic.text)
     var editors = { 2: generic.text, 3: password, 4: user_level }
     return initTable('#users','/user',$.extend( { editors: editors },arg_base))
+  },
+
+  reports: function(arg_base,generic) {
+    if(!arg_base.admin) hideTabByName('tab-reports')
   }
 }
 
@@ -351,15 +363,18 @@ $(document).ready(function() {
 
   $('#tabs').tabs()
 
+  //allows jEditable to submit select element when its value changes
   $('select').live('change', function() {
    $(this).parent().submit()
   })
 
+  //allows jEditable to submit select element without confirm button, only using  <enter> key
   $('select').live('keydown', function (event) {
     if(event.keyCode == 13) $(this).parent().submit();
   })
   
-  var arg_base = { 'jEditable'      : admin,
+  var arg_base = { 'admin'          : admin,
+                   'jEditable'      : admin,
                    'add'            : admin,
                    'save-changes'   : admin,
                    'cancel-changes' : admin,
@@ -387,7 +402,7 @@ $(document).ready(function() {
     }
   }
 
-  generic_editors.doUpdate(false)  
+  generic_editors.doUpdate(false)
 
   var tables = {}
   $.each({ gstatus:  true,
@@ -399,7 +414,8 @@ $(document).ready(function() {
            payments: true,
            events:   true,
            terminals:true,
-           users:    true
+           users:    true,
+           reports:  true
   },function(key,value) {
     if(value) tables[key] = init[key](arg_base,generic_editors)
   })

@@ -14,7 +14,7 @@ register_handler('/tariff'  ,  Editor( Tariff.data_provider() ) )
 register_handler('/events'  ,  Viewer( EventsView.data_provider() ) )
 register_handler('/payment' ,  Viewer( PaymentView.data_provider() ) )
 register_handler('/terminal',  Editor( Terminal.data_provider() ) )
-register_handler('/user'    ,  Editor( User.data_provider() ) )
+register_handler('/user'    ,  Editor( User.data_provider(), secure = True ) )
 register_handler('/upload'  ,  DatabaseUploader() )
 
 runserver()

@@ -56,7 +56,7 @@ def access_check(request):
 def access_level(level):
  def decorator(func):
   def wrapper(self,req):
-   if access_check(req)[0] < level: return req.bad_request()  
+   if access_check(req)[0] < level: return req.forbidden('Access denied')  
    return func(self,req)
   return wrapper
  return decorator
@@ -89,6 +89,7 @@ class Request(object):
  FOUND        = '302 Found'
  BAD_REQUEST  = '400 Bad Request'
  UNAUTHORIZED = '401 Unauthorized'
+ FORBIDDEN    = '403 Forbidden'
  NOT_FOUND    = '404 Not Found'
  NOT_ALLOWED  = '405 Method not allowed'
  SERVER_ERROR = '500 Internal Server Error'
@@ -122,6 +123,10 @@ class Request(object):
  def bad_request(self,exception):
   self.start_response(self.BAD_REQUEST,[self.content_type['plain']])
   return [repr(exception)] 
+
+ def forbidden(self,exception = ''):
+  self.start_response(self.FORBIDDEN,[self.content_type['plain']])
+  return [str(exception)]
 
  def server_error(self,exception):
   self.start_response(self.SERVER_ERROR,[self.content_type['plain']])

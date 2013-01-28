@@ -2,8 +2,8 @@ from viewer import Viewer
 from http import access_level
 
 class Editor(Viewer):
- def __init__(self,provider):
-  super(Editor,self).__init__(provider,cache = True)
+ def __init__(self,provider,secure = False):
+  super(Editor,self).__init__(provider,cache = True,secure = secure)
 
   self.handlers['POST'].update({
    'edit'   : self.edit,

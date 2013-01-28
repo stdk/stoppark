@@ -2,6 +2,7 @@
 from string import Template
 from database import Connection,Model,DATABASE_FILENAME
 from socket import create_connection
+from http import access_level
 
 TEMPLATE = '''
 ${message}
@@ -21,11 +22,13 @@ class DatabaseUploader(object):
  SUCCESS_MESSAGE = 'Загрузка завершена успешно.'
  FAIL_MESSAGE    = 'Не удалось загрузить файл базы данных'
 
+ @access_level(2)
  def get(self,request,message = None):
   if not message: message = self.INITIAL_MESSAGE
   request.start_response(request.OK,[request.content_type['html']])
   return Template(TEMPLATE).substitute({'message' : message})
 
+ @access_level(2)
  def post(self,request):
   try:
    new_db = request.post_query()['file']
