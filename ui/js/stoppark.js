@@ -291,7 +291,7 @@ var init = {
   tariffs: function(arg_base,generic_editors) {
     var text = generic_editors.text
     var tariff_type = { type: 'select',
-                        data: { '1':'Фиксированный', '2':'Переменный', '3' : 'Разовый', '4' : 'Новый тариф' }, 
+                        data: { '1':'Фиксированный', '2':'Переменный', '3' : 'Разовый', '4' : 'Новый тариф', '5':'Продоплаченный' }, 
                         width: "40px" }
     var tariff_interval = { type: 'select', data: { '1':'час', '2':'сутки', '3':'месяц' }, width: "20px" }
     var tariff_cost = { type: 'costpicker', jEditable: true, isExtended: function(row) {
