@@ -61,6 +61,6 @@ class DatabaseUploader(object):
    return self.get(request,self.SUCCESS_MESSAGE)
   except Exception as e:
    message = '%s: [%s]: %s' % (self.FAIL_MESSAGE,e.__class__.__name__,e)
-   return self.get(request,message) 
+   return self.get(request,message=message) 
   finally:
    Model.connection.open(DATABASE_FILENAME,replace=True)

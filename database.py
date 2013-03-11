@@ -1,4 +1,4 @@
-from sqlite3 import connect as sqlite3_connect
+from sqlite3 import connect as sqlite3_connect,Row as sqlite3_row
 from itertools import izip
 
 DATABASE_FILENAME = 'data/db.db3'
@@ -13,6 +13,7 @@ class Connection(object):
   if not self.connection:
    self.connection = sqlite3_connect(filename)
    self.connection.text_factory = str
+   self.connection.row_factory = sqlite3_row
    self._cursor = self.connection.cursor() 
   else:
    print 'Connection already open'
@@ -89,8 +90,9 @@ class MetaModel(type):
   field_definitions = ','.join( ( '%s %s' % ( key,dict[key].definition() ) for key in fields ) )
   visible_fields = [key for key in fields if dict[key].visible]
   create_query = 'create table if not exists %s (%s)' % (name,field_definitions)
-  select_query = 'select %s from %s' % (','.join(fields),name)
-  save_query = 'insert or replace into %s values(%s)' % (name,','.join('?' * len(fields)))
+  #select_query = 'select %s from %s' % (','.join(fields),name)
+  select_query = 'select * from %s' %(name)
+  save_query = 'replace into %s(%s) values(%s)' % (name,','.join(fields),','.join('?' * len(fields)))
   delete_query = 'delete from %s' % (name)
 
   dict['fields']         = fields
@@ -110,7 +112,7 @@ class MetaModel(type):
  
   return type.__new__(cls, name, bases, dict)
 
- def __call__(cls,*args,**kw):
+ def __call__(cls,row = None,*args,**kw):
   '''
   MetaClass constructor for all derived classes 
   Supports 3-step field initialization:
@@ -120,7 +122,8 @@ class MetaModel(type):
   '''
   obj = super(MetaModel, cls).__call__()
   [ setattr(obj,key,kw.get(key,None)) for key in cls.fields if key not in obj.__dict__ ]
-  [ obj.__dict__.__setitem__(key,value) for key,value in args ]
+  #[ obj.__dict__.__setitem__(key,value) for key,value in args ]
+  if row: [obj.__dict__.__setitem__(key,row[key]) for key in row.keys()] 
   return obj
 
  @staticmethod
@@ -154,7 +157,7 @@ class MetaModel(type):
  def objects_from_query(cls,query,izip=izip):
   cursor = cls.connection.cursor()
   cursor.execute(query)
-  return [ cls(*izip(cls.fields,row)) for row in cursor ]
+  return [cls(row) for row in cursor]  
 
  @staticmethod
  def all(cls):
@@ -182,8 +185,8 @@ class Field(object):
    idx += 1
  idx_gen = idx_gen()
 
- def __init__(self,**kwargs):
-  self.idx = Field.idx_gen.next()
+ def __init__(self,idx=None,**kwargs):
+  self.idx = idx if idx else Field.idx_gen.next()
   self.sql =  { 'primary_key':'primary key','not_null':'not null' }
   self.arg = [ 'visible' ]
   [setattr(self,key,value) for (key,value) in kwargs.iteritems() if key in self.sql or key in self.arg]
@@ -198,9 +201,6 @@ class BlobField(Field):
 
 class IntField(Field):
  typename = 'integer'
-
-class RealField(Field):
- typename = 'real'
 
 class Model(object):
  __metaclass__ = MetaModel

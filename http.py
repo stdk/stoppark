@@ -55,9 +55,12 @@ def access_check(request):
 #applicable only to class members with request as a second parameter
 def access_level(level):
  def decorator(func):
-  def wrapper(self,req):
-   if access_check(req)[0] < level: return req.forbidden('Access denied')  
-   return func(self,req)
+  def wrapper(self,req,*args,**kw):
+   try:
+    if access_check(req)[0] < level: return req.forbidden('Access denied')  
+   except Exception as e:
+    print e.__class__.__name__
+   return func(self,req,*args,**kw)
   return wrapper
  return decorator
 

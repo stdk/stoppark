@@ -195,11 +195,21 @@ table.display tr.heading2 td {
 }
 
 table.display td {
-	padding: 3px 10px;
+	padding: 2px;
 }
 
 table.display td.center {
 	text-align: center;
+}
+
+table.display td input {
+	padding: 0px;	
+	margin: 0px;
+}
+
+table.display td select {
+	padding: 0px;	
+	margin: 0px;
 }
 
 

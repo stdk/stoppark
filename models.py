@@ -5,7 +5,7 @@ from base64 import b64encode as enc
 
 class LStatus(Model):
  LStatus = TextField(visible=False)
- id = IntField(primary_key=True)
+ ID = IntField(primary_key=True)
  ReportHKol = IntField()
  ReportHSum = IntField()
  ReportDKol = IntField() 
@@ -28,7 +28,7 @@ class Card(Model):
   self.Status = 1
 
  Card = TextField(visible=False)
- id = IntField(primary_key=True)
+ ID = IntField(primary_key=True)
  Type = IntField()
  CardID = TextField()
  DTReg = TextField()
@@ -49,7 +49,7 @@ class Card(Model):
 
 class GStatus(Model):
  LStatus = TextField(visible=False)
- id = IntField(primary_key=True,visible=False)
+ ID = IntField(primary_key=True,visible=False)
 
  InCounterWhole = IntField()
  InCounterYear = IntField()
@@ -81,8 +81,7 @@ class Ticket(Model):
  def __init__(self):
   self.Ticket = 'Ticket'
  Ticket = TextField(visible=False)
- id = IntField(primary_key=True)
-
+ ID = IntField(primary_key=True)
  BAR = TextField()
  TypeTarif = IntField()
  PriceTarif = IntField()
@@ -95,7 +94,7 @@ class Ticket(Model):
  Status = IntField()
 
 class TicketView(Model):
- id = IntField()
+ ID = IntField()
  BAR = TextField()
  TypeTarif = IntField()
  PriceTarif = IntField()
@@ -111,7 +110,7 @@ class Config(Model):
  def __init__(self):
   self.Config = 'Config'
  Config = TextField(visible=False)
- id = TextField(primary_key=True,visible=False)
+ ID = TextField(primary_key=True,visible=False)
  PlaceNum = IntField()
  FreeTime = IntField()
  PayTime = TextField()
@@ -204,6 +203,7 @@ class Events(Model):
  Direction = TextField()
  Reason = TextField()
  FreePlaces = IntField()
+ Card = TextField()
 
 class EventsView(Model):
  EventName = TextField()
@@ -212,6 +212,7 @@ class EventsView(Model):
  Direction = TextField()
  Reason = TextField()
  FreePlaces = IntField() 
+ Card = TextField()
 
 class Terminal(Model):
  id = IntField(primary_key=True)
