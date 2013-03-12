@@ -27,6 +27,9 @@ class Card(Model):
   self.Type = 2
   self.Status = 1
 
+ #def __del__(self):
+ # print 'Card.__del__',self.ID
+
  Card = TextField(visible=False)
  ID = IntField(primary_key=True)
  Type = IntField()

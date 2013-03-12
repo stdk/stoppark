@@ -3,10 +3,12 @@ from tempfile import NamedTemporaryFile
 from gevent.wsgi import WSGIServer
 from commands import getoutput
 from cgi import FieldStorage
+from Cookie import SimpleCookie
 from string import Template
 from base64 import b64decode,b64encode
 from hashlib import md5
 from models import User
+
 
 HOST = getoutput("/sbin/ifconfig").split("\n")[1].split()[1][5:]
 PORT = 2000
@@ -64,17 +66,25 @@ def access_level(level):
   return wrapper
  return decorator
 
+class Cookie(SimpleCookie):
+ def __init__(self,request = None,**kw):
+  super(Cookie,self).__init__(request.env.get('HTTP_COOKIE',None) if request else None)
+  [self.__setitem__(key,value) for key,value in kw.iteritems()]
+
+ def headers(self):
+  return [('Set-Cookie',morsel.OutputString()) for morsel in self.values()]
+
 def auth(request):
- location = 'http://{0}:{1}/'.format(HOST,PORT)
- request.start_response(request.FOUND,[
-  ('Set-Cookie','logout=true'),
-  ('Location',location)
- ])
- return ''
+ headers = Cookie(logout = 'true').headers()
+ headers.append(('Location','http://{0}:{1}/'.format(HOST,PORT)))
+ request.start_response(request.FOUND,headers)
+ return ['']
 
 def index(request):
- if request.env.get('HTTP_COOKIE','') == 'logout=true':
-  return request.auth(AUTH_ZONE,[('Set-Cookie','logout=false')])
+ cookie = Cookie(request)
+ logout = cookie.get('logout')
+ if logout and logout.value == 'true':
+  return request.auth(AUTH_ZONE,Cookies(logout = 'false').headers())
 
  access = access_check(request)
  if not access[0]: return request.auth(AUTH_ZONE)
@@ -110,7 +120,7 @@ class Request(object):
  def post_query(self):
   return CustomFieldStorage(fp=self.env['wsgi.input'],environ=self.env)
 
- def auth(self,realm,ext_headers=[]):
+ def auth(self,realm,ext_headers = []):
   headers = [('WWW-Authenticate','Basic realm="{0}"'.format(realm))]
   self.start_response(self.UNAUTHORIZED,headers + ext_headers)
   return []
@@ -135,7 +145,7 @@ class Request(object):
   self.start_response(self.SERVER_ERROR,[self.content_type['plain']])
   return [repr(exception)] 
 
- def ok(self,headers=[],data=''):
+ def ok(self,headers = [],data = '',**kw):
   self.start_response(self.OK,headers)
   return [data]
 

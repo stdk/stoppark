@@ -70,9 +70,11 @@ function initTable(selector,path,args) {
     }
 
     var submitdata = function ( value, settings ) {
+      var position = table.fnGetPosition(this)
       var result = {
-        "row" : table.fnGetPosition( this )[0],
-        "col" : table.fnGetPosition( this )[1]
+        row: position[0],
+        col: position[1],
+        id: table.fnGetData(position[0],0)
       }
 
       if('reverse_transform' in settings) {
@@ -161,6 +163,7 @@ function initTable(selector,path,args) {
         bInfo: true,
         bAutoWidth: false,
         bProcessing: true,
+        bServerSide: args.serverSide,
         bJQueryUI: true,
         sAjaxSource: path + '/data',
         sPaginationType: 'full_numbers',
@@ -273,7 +276,7 @@ var init = {
     for(var i=6;i<15;i++) editors[i] = generic.text
     editors[15] = card_status
     editors[16] = generic.tariff    
-    var cards = initTable('#cards','/card',$.extend( { editors: editors },arg_base))
+    var cards = initTable('#cards','/test',$.extend( { editors: editors, serverSide: true },arg_base))
 
     $('#cards_filter input').autocomplete({
       source: [  'разрешен','запрещен','администратор','кассир','пропуск' ],

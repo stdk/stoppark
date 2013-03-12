@@ -32,6 +32,13 @@ class Connection(object):
  def commit(self):
   return self.connection.commit()
 
+ def __enter__(self):
+  return self.connection.__enter__()
+ 
+ def __exit__(self, *args):
+  return self.connection.__exit__(*args)
+ 
+
 class ModelDataProvider(object):
  def __init__(self,cls):
   self.cls = cls

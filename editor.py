@@ -1,5 +1,6 @@
 from viewer import Viewer
 from http import access_level
+from cgi import escape
 
 class Editor(Viewer):
  def __init__(self,provider,secure = False):
@@ -18,7 +19,7 @@ class Editor(Viewer):
   post = request.post_query()
 
   try:
-   value = post['value'].value
+   value = escape(post['value'].value)
    row = int(post['row'].value)
    col = int(post['col'].value)  
    self.provider.setattr(row=row,idx=col,value=value) 
