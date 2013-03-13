@@ -11,7 +11,7 @@ class Connection(object):
  def open(self,filename = DATABASE_FILENAME, replace = False):
   if self.connection and replace: self.close()
   if not self.connection:
-   self.connection = sqlite3_connect(filename)
+   self.connection = sqlite3_connect(filename,isolation_level = 'DEFERRED')
    self.connection.text_factory = str
    self.connection.row_factory = sqlite3_row
    self._cursor = self.connection.cursor() 
@@ -32,6 +32,9 @@ class Connection(object):
  def commit(self):
   return self.connection.commit()
 
+ def rollback(self):
+  return self.connection.rollback()
+
  def __enter__(self):
   return self.connection.__enter__()
  
@@ -50,11 +53,12 @@ class ModelDataProvider(object):
   return [ record.array(only_visible=True) for record in data ]
  
  def load(self):
-  self.modified.clear()
+  self.modified.clear()    
   self.data = self.cls.all()
  
  def save(self):
   [ record.save() for record in self.modified ]
+  self.cls.connection.commit()
   self.load()
  
  def append(self):
@@ -85,6 +89,7 @@ class InvertModelDataProvider(object):
 
  def save(self):
   self.record.save()
+  self.cls.connection.commit()
   self.load()
  
  def setattr(self,row,idx,value):
@@ -93,14 +98,17 @@ class InvertModelDataProvider(object):
 class MetaModel(type):
  def __new__(cls, name, bases, dict):
 
-  fields = sorted( [ key for key,value in dict.iteritems() if hasattr(value,'definition') ], key = lambda k:dict[k].idx )
+  all_fields = sorted( [ key for key,value in dict.iteritems() if hasattr(value,'idx') ], key = lambda k:dict[k].idx )
+  fields = [key for key in all_fields if hasattr(dict[key],'definition')]
   field_definitions = ','.join( ( '%s %s' % ( key,dict[key].definition() ) for key in fields ) )
-  visible_fields = [key for key in fields if dict[key].visible]
+  visible_fields = [key for key in all_fields if dict[key].visible]
   create_query = 'create table if not exists %s (%s)' % (name,field_definitions)
-  #select_query = 'select %s from %s' % (','.join(fields),name)
   select_query = 'select * from %s' %(name)
   save_query = 'replace into %s(%s) values(%s)' % (name,','.join(fields),','.join('?' * len(fields)))
   delete_query = 'delete from %s' % (name)
+
+  try: dict['primary_key'] = [key for key in all_fields if hasattr(dict[key],'primary_key')][0]
+  except IndexError: print 'There is no primary key defined for:',name
 
   dict['fields']         = fields
   dict['visible_fields'] = visible_fields
@@ -143,16 +151,13 @@ class MetaModel(type):
   values = self.array()
   cursor = self.connection.cursor()
   cursor.execute(self.save_query,values)
-  self.connection.commit()
 
  @staticmethod
  def delete(self):
   cursor = self.connection.cursor()
-  pk = 'id'
-  clause = ' where %s="%s"' % (pk,getattr(self,pk))
+  clause = ' where %s="%s"' % (self.primary_key,getattr(self,self.primary_key))
   query = self.delete_query + clause
   cursor.execute(query)
-  self.connection.commit()
 
  @staticmethod
  def create(cls):
@@ -182,7 +187,6 @@ class MetaModel(type):
   else: return ModelDataProvider(cls)
 
 class Field(object):
- typename = 'text'
  visible = True
 
  def idx_gen():
@@ -192,22 +196,33 @@ class Field(object):
    idx += 1
  idx_gen = idx_gen()
 
- def __init__(self,idx=None,**kwargs):
-  self.idx = idx if idx else Field.idx_gen.next()
+ def __init__(self):
+  self.idx = self.idx_gen.next()
+
+class SqlField(Field):
+ typename = 'text'
+
+ def __init__(self,**kwargs):
+  super(SqlField,self).__init__()
   self.sql =  { 'primary_key':'primary key','not_null':'not null' }
-  self.arg = [ 'visible' ]
+  self.arg = [ 'visible','idx' ]
   [setattr(self,key,value) for (key,value) in kwargs.iteritems() if key in self.sql or key in self.arg]
  def definition(self):
   return ' '.join( (self.typename,' '.join([self.sql[key] for key in self.sql if hasattr(self,key)])) )
 
-class TextField(Field):
+class TextField(SqlField):
  typename = 'text'
 
-class BlobField(Field):
+class BlobField(SqlField):
  typename = 'blob'
 
-class IntField(Field):
+class IntField(SqlField):
  typename = 'integer'
+
+class VirtualField(Field,property):
+ def __init__(self,*args):
+  Field.__init__(self)
+  property.__init__(self,*args)
 
 class Model(object):
  __metaclass__ = MetaModel

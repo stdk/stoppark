@@ -17,6 +17,5 @@ register_handler('/payment' ,  Viewer( PaymentView.data_provider() ) )
 register_handler('/terminal',  Editor( Terminal.data_provider() ) )
 register_handler('/user'    ,  Editor( User.data_provider(), secure = True ) )
 register_handler('/upload'  ,  DatabaseUploader() )
-register_handler('/test'    ,  ServerSideEditor() )
 
 runserver()

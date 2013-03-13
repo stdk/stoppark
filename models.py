@@ -1,4 +1,6 @@
-from database import Model,TextField,IntField
+# -*- coding: utf8 -*-
+
+from database import Model,TextField,IntField,VirtualField
 from time import strftime
 from hashlib import md5
 from base64 import b64encode as enc
@@ -27,12 +29,18 @@ class Card(Model):
   self.Type = 2
   self.Status = 1
 
- #def __del__(self):
- # print 'Card.__del__',self.ID
+ 
 
  Card = TextField(visible=False)
  ID = IntField(primary_key=True)
- Type = IntField()
+ Type = IntField(visible=False)
+
+ def get_type(self):
+  return {0:'служебный',1:'разовый',2:'клиент',3:'кассир',4:'админ'}.get(self.Type,'unknown')
+ def set_type(self,value):
+  self.Type = value
+ VirtualType = VirtualField(get_type,set_type)
+
  CardID = TextField()
  DTReg = TextField()
  DTEnd = TextField()
@@ -45,7 +53,14 @@ class Card(Model):
  CarGosNom = TextField()
  CarModel = TextField()
  CarColor = TextField()
- Status = IntField()
+ Status = IntField(visible=False)
+
+ def get_status(self):
+  return {1:'разрешен',2:'утерян',3:'просрочен',4:'запрещен'}.get(self.Status,'unknown')
+ def set_status(self,value):
+  self.Type = value
+ VirtualStatus = VirtualField(get_status,set_status)
+
  TarifType = IntField()
  TarifPrice = IntField(visible=False)
  TarifSumm = IntField(visible=False)
