@@ -61,8 +61,7 @@ var init = {
   },
 
   tickets: function(arg_base,generic) {
-    var editors = { 3: generic.tariff, 4: generic.price, 5: generic.price, 11: generic.status }
-    return initTable('#tickets', '/ticket', $.extend({editors: editors},arg_base,{delete: false, jEditable: false}))
+    return initTable('#tickets', '/ticket', arg_base)
   },
 
   tariffs: function(arg_base,generic_editors) {
@@ -102,16 +101,7 @@ var init = {
   },
 
   payments: function(arg_base,generic) {
-    var payments = { type: 'select',
-      data: {
-        'Card payment'  : 'Абонемент',
-        'Single payment': 'Разовый',
-        'Talon payment' : 'Талон'
-      }
-    }
-
-    var editors = { 1: payments, 3: generic.tariff, 7: generic.status, 8: generic.price, 12: generic.price }
-    return initTable('#payment','/payment',$.extend({editors: editors},arg_base,{delete: false, jEditable: false}))
+    return initTable('#payment','/payment',arg_base)
   },
 
   terminals: function(arg_base,generic) {
@@ -120,12 +110,13 @@ var init = {
   },
 
   users: function(arg_base,generic) {
-    if(!arg_base.admin) hideTabByName('tab-user')
+    if(!arg_base.admin) {
+      hideTabByName('tab-user')
+      return;
+    }
 
     var user_level = { type: 'select', data: { '1' : 'Пользователь', '2' : 'Администратор' } }
-    //obscure hash values from database
-    var password = $.extend({ transform: function(value) { return '***********' } }, generic.text)
-    var editors = { 2: generic.text, 3: password, 4: user_level }
+    var editors = { 2: generic.text, 3: generic.text, 4: user_level }
     return initTable('#users','/user',$.extend( { editors: editors },arg_base))
   },
 
@@ -163,7 +154,6 @@ $(document).ready(function() {
     text  : { height: "9px", width: "70px" },
     date  : { type: 'datepicker' },
     time  : { type: 'timepicker' },
-    color : { height: "10px", data: " {'Черный':'Черный','Белый':'Белый','Желтый':'Желтый', 'selected':'Черный'}", type: 'select' },
     status: { type: 'select', data: { '1' : 'Въехал', '5' : 'Оплачен', '13': 'Выехал' } },
     tariff: { type: 'select', data: {} },
     price : { height:"9px",
@@ -197,7 +187,7 @@ $(document).ready(function() {
     if(value) tables[key] = init[key](arg_base,generic_editors)
   })
 
-  setInterval(function() {
+  /*setInterval(function() {
     generic_editors.doUpdate(true)
 
     if( !admin ) { 
@@ -211,6 +201,6 @@ $(document).ready(function() {
       tables.events.fnReloadAjax(null,null,true)
       tables.payments.fnReloadAjax(null,null,true)
     }
-  },10000)
+  },10000)*/
 
 })

@@ -114,9 +114,9 @@ function initTable(selector,path,args) {
             var e = $(element)
             var value = e.text()
             if(value in editor.data) {
-              e.text(editor.data[value])
-              //var aPos = table.fnGetPosition( element )
-              //table.fnUpdate( editor.data[value], aPos[0], aPos[1] , false)
+              //e.text(editor.data[value])
+              var aPos = table.fnGetPosition( element )
+              table.fnUpdate( editor.data[value], aPos[0], aPos[1] , false)
             }
           }) 
         }
@@ -171,7 +171,7 @@ function initTable(selector,path,args) {
 
   var table = $(selector).dataTable({
         oLanguage: datatablesRuLang,
-        iDisplayLength: 20,
+        iDisplayLength: 25,
         bPaginate: true,
         bLengthChange: false,
         bFilter: 'filter' in args && args.filter,
@@ -185,7 +185,19 @@ function initTable(selector,path,args) {
         sPaginationType: 'full_numbers',
         aaSorting: [],
         bDeferRender: true,
-        fnDrawCallback: draw_callback
+        fnDrawCallback: draw_callback,
+        //sDom: 'R<"H"lfr>t<"F"ip>',
+        "fnServerData": function ( sSource, aoData, fnCallback ) {
+          $.getJSON( sSource, aoData, function (json) {
+            fnCallback(json);
+          }).error(function(jqXHR, statusText, errorThrown) {
+            //when data request failed with to 403 Forbidden status
+            //we should try to authenticate user once more
+            if(jqXHR.status == 403) {
+              window.location += 'auth'
+            }            
+          });
+        }
   });
 
   if('add' in args && args.add) {
