@@ -39,8 +39,12 @@ var init = {
   },
 
   cards: function(arg_base,generic) {
-    var card_type = { data: {'0':'служебный','1':'разовый','2':'клиент','3':'кассир','4':'админ'}, type : 'select' }
-    var card_status = { data: {'1':'разрешен','2':'утерян','3':'просрочен','4':'запрещен'}, type : 'select' }
+    var card_type = { data: {
+      '0':'служебный','1':'разовый','2':'клиент','3':'кассир','4':'админ'
+    }, type : 'select' }
+    var card_status = { data: { 
+      '1': 'разрешен','2': 'утерян','3': 'просрочен','4': 'запрещен','5': 'выехал','6': 'вьехал' 
+    }, type : 'select' }
 
     var editors = {}
     editors[2] = card_type
@@ -53,7 +57,7 @@ var init = {
     var cards = initTable('#cards','/card',$.extend( { editors: editors },arg_base))
 
     $('#cards_filter input').autocomplete({
-      source: [  'разрешен','запрещен','администратор','кассир','пропуск' ],
+      source: [  'разрешен','запрещен','админ','кассир','пропуск' ],
       minLength: 0
     })
 
@@ -93,11 +97,7 @@ var init = {
   },
 
   events: function(arg_base,generic) {
-    var events = { type: 'select', data: { 'moving' :'Проезд','opening':'Открытие', 'unknown':'Неизвестно' } }
-    var direction = { type: 'select', data: { 'into'   :'Въезд', 'outfrom':'Выезд' } }
-    var reason = { type: 'select', data: { 'auto'   :'Автоматический', 'manual' :'Ручной' } }
-    var editors = { 1: events, 3: generic.terminal, 4: direction, 5: reason }
-    return initTable('#events','/events',$.extend({editors: editors},arg_base,{delete: false, jEditable: false}))
+    return initTable('#events','/events',arg_base)
   },
 
   payments: function(arg_base,generic) {
@@ -151,21 +151,13 @@ $(document).ready(function() {
                    'sort'           : true }
 
   var generic_editors = {
-    text  : { height: "9px", width: "70px" },
+    text  : { height: "8px", width: "70px" },
     date  : { type: 'datepicker' },
     time  : { type: 'timepicker' },
-    status: { type: 'select', data: { '1' : 'Въехал', '5' : 'Оплачен', '13': 'Выехал' } },
     tariff: { type: 'select', data: {} },
-    price : { height:"9px",
-             transform: function(value) { return (parseFloat('0'+value)/100).toString() },
-             reverse_transform: function(value) { return (parseFloat('0'+value)*100).toString() }
-    },
-
-    terminal: {type: 'select', data: {} },
 
     doUpdate: function(async) {
       this.tariff.data = getForeignKeyData('/tariff/data',{ i: 0, j: 1, async: async })
-      this.terminal.data = getForeignKeyData('/terminal/data',{i: 1, j: 2, async: async})
     }
   }
 
@@ -187,20 +179,15 @@ $(document).ready(function() {
     if(value) tables[key] = init[key](arg_base,generic_editors)
   })
 
-  /*setInterval(function() {
+  setInterval(function() {
     generic_editors.doUpdate(true)
 
-    if( !admin ) { 
-      for(var key in tables) {
-        tables[key].fnReloadAjax(null,null,true)
-      }
-    } else { //update only tables that we cannot edit in admin interface, i.e. readonly tables 
-      tables.gstatus.fnReloadAjax()
-      tables.lstatus.fnReloadAjax()
-      tables.tickets.fnReloadAjax(null,null,true)
-      tables.events.fnReloadAjax(null,null,true)
-      tables.payments.fnReloadAjax(null,null,true)
-    }
-  },10000)*/
+    //update readonly tables 
+    tables.gstatus.fnReloadAjax()
+    tables.lstatus.fnReloadAjax()
+    tables.tickets.fnReloadAjax(null,null,true)
+    tables.events.fnReloadAjax(null,null,true)
+    tables.payments.fnReloadAjax(null,null,true)
+  },10000)
 
 })
