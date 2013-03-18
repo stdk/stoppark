@@ -1,0 +1,95 @@
+alter table card rename to card_old;
+
+create table Card (
+	Card text not null default "Card",
+	ID integer primary key,
+	Type integer,
+	CardID text,
+	DTReg text,
+	DTEnd text,
+        DTIn text,
+        DTOut text,
+	DriveName text,
+	DriveSName text,
+	DriveFam text,
+	DrivePhone text,
+	CarGosNom text,
+	CarModel text,
+	CarColor text,
+	Status integer,
+	TarifType integer,
+	TarifPrice integer,
+	TarifSumm integer
+);
+
+insert into Card select 
+	Card,ID,
+	Type,
+	CardID,
+	concat(substr(DTReg,7,2),substr(DTReg,3,4),substr(DTReg,1,2)),
+	concat(substr(DTEnd,7,2),substr(DTEnd,3,4),substr(DTEnd,1,2)),
+	"",
+	"",
+	DriveName,
+	DriveSName,
+	DriveFam,
+	DrivePhone,
+	CarGosNom,
+	CarGosNom,
+	CarColor,
+	Status,
+	TarifType,
+	TarifPrice,
+	TarifSumm
+from card_old;
+
+alter table events add column card text;
+
+drop view EventsView;
+create view EventsView as select
+	EventName,
+	DateTime,
+	Terminal.title as Terminal,
+	Direction,
+	Reason,
+	FreePlaces,
+	Card
+from Events
+left join Terminal on Events.Terminal = Terminal.id
+order by id desc limit 0,150;
+
+drop view PaymentView;
+create view PaymentView as select 
+	payment_type.value as Payment,
+	TalonID,
+	Tariff.Name as Type,
+	Kassa,
+	Operator,
+	DTime,
+	status.value as Status,
+	Tarif/100 as Tarif,
+	TarifKol,DTIn,
+	DTOut,Summa / 100 as Summa
+from Payment
+left join status on Payment.Status = status.id
+left join payment_type on payment_type.id = Payment.Payment
+left join Tariff on Tariff.id = Payment.Type
+order by Payment.id desc limit 0,150;
+
+drop view TicketView;
+create view TicketView as select
+	Ticket.id as ID,
+	BAR,
+	Tariff.Name as TypeTarif,
+	PriceTarif/100 as PriceTarif,
+	Summ/100 as Summ,
+	SummDopl/100 as SummDopl,
+	TimeIn,
+	TimeOut,
+	TimeCount,
+	TimeDopl,
+	status.value as Status
+from Ticket
+left join status on Ticket.Status=status.id
+left join Tariff on Ticket.TypeTarif=Tariff.id
+order by Ticket.id desc limit 0,150;

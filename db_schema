@@ -5,8 +5,8 @@ CREATE TABLE Card (
 	CardID text,
 	DTReg text,
 	DTEnd text,
-  DTIn text,
-  DTOut text,
+	DTIn text,
+	DTOut text,
 	DriveName text,
 	DriveSName text,
 	DriveFam text,
@@ -150,14 +150,48 @@ CREATE TABLE User (
 	level integer
 );
 
-CREATE VIEW EventsView as
-select EventName,DateTime,Terminal,Direction,Reason,FreePlaces
-from Events order by id desc limit 0,150;
+create view EventsView as select
+	EventName,
+	DateTime,
+	Terminal.title as Terminal,
+	Direction,
+	Reason,
+	FreePlaces,
+	Card
+from Events
+left join Terminal on Events.Terminal = Terminal.id
+order by id desc limit 0,150;
 
-CREATE VIEW PaymentView as
-select Payment,TalonID,Type,Kassa,Operator,DTime,Status,Tarif,TarifKol,DTIn,DTOut,Summa 
-from Payment order by id desc limit 0,150;
+create view PaymentView as select 
+	payment_type.value as Payment,
+	TalonID,
+	Tariff.Name as Type,
+	Kassa,
+	Operator,
+	DTime,
+	status.value as Status,
+	Tarif/100 as Tarif,
+	TarifKol,DTIn,
+	DTOut,Summa / 100 as Summa
+from Payment
+left join status on Payment.Status = status.id
+left join payment_type on payment_type.id = Payment.Payment
+left join Tariff on Tariff.id = Payment.Type
+order by Payment.id desc limit 0,150;
 
-CREATE VIEW TicketView as
-select id,BAR,TypeTarif,PriceTarif,Summ,SummDopl,TimeIn,TimeOut,TimeCount,TimeDopl,Status 
-from Ticket order by id desc limit 0,150;
+create view TicketView as select
+	Ticket.id as ID,
+	BAR,
+	Tariff.Name as TypeTarif,
+	PriceTarif/100 as PriceTarif,
+	Summ/100 as Summ,
+	SummDopl/100 as SummDopl,
+	TimeIn,
+	TimeOut,
+	TimeCount,
+	TimeDopl,
+	status.value as Status
+from Ticket
+left join status on Ticket.Status=status.id
+left join Tariff on Ticket.TypeTarif=Tariff.id
+order by Ticket.id desc limit 0,150;
