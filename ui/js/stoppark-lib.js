@@ -120,20 +120,6 @@ function initTable(selector,path,args) {
             }
           }) 
         }
-
-        //transform option allows us to change value in cell using predefined function
-        if('transform' in editor) {
-          elements.each(function(index,element) {
-            var e = $(element)
-            var value = e.text()
-            if(e.data('value') != value) {
-              var transformed_value = editor.transform(value)
-              var aPos = table.fnGetPosition( element )
-              table.fnUpdate(transformed_value, aPos[0], aPos[1] , false)
-              e.data('value',transformed_value)
-            }
-          })
-        }
       }
  
       if('delete' in args && args.delete) {
