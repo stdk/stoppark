@@ -29,8 +29,6 @@ class Card(Model):
   self.Type = 2
   self.Status = 1
 
- 
-
  Card = TextField(visible=False)
  ID = IntField(primary_key=True)
  Type = IntField(visible=False)
@@ -148,12 +146,22 @@ class Config(Model):
 class User(Model):
  id       = IntField(primary_key=True)
  name     = TextField()
- password = TextField()
- level    = IntField()
+ 
+ password = TextField(visible=False)
+ @VirtualField
+ def v_password(self):
+  return '**********'  
+ @v_password.setter 
+ def v_password(self,value):
+  self.password = enc(md5(value).digest())
 
- def __setattr__(self,key,value):
-  if key == 'password' and value: value = enc(md5(value).digest())
-  object.__setattr__(self, key, value)
+ level = IntField(visible=False)
+ @VirtualField
+ def v_level(self):
+  return { 1 : 'Пользователь', 2 : 'Администратор' }.get(self.level,'unknown')
+ @v_level.setter
+ def v_level(self,value):
+  self.level = value
 
  def __str__(self):
   return '{0}:{1}:{2}'.format(self.name,self.password,self.level)

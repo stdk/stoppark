@@ -94,6 +94,7 @@ class InvertModelDataProvider(object):
  
  def setattr(self,row,idx,value):
   setattr(self.record,self.cls.visible_fields[row],value)
+  return value
 
 class MetaModel(type):
  def __new__(cls, name, bases, dict):

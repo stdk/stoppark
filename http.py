@@ -84,7 +84,7 @@ def index(request):
  cookie = Cookie(request)
  logout = cookie.get('logout')
  if logout and logout.value == 'true':
-  return request.auth(AUTH_ZONE,Cookies(logout = 'false').headers())
+  return request.auth(AUTH_ZONE,Cookie(logout = 'false').headers())
 
  access = access_check(request)
  if not access[0]: return request.auth(AUTH_ZONE)
