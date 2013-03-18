@@ -43,20 +43,45 @@ insert into Card select
 	TarifSumm
 from card_old;
 
+create table payment_type (id text primary key, value text);
+insert into payment_type(id,value) values('Card payment','Абонемент');
+insert into payment_type(id,value) values('Single payment','Разовый');
+insert into payment_type(id,value) values('Talon payment','Талон');
+
+create table status (id integer primary key,value text);
+insert into status(id,value) values(1,'Вьехал');
+insert into status(id,value) values(5,'Оплачен');
+insert into status(id,value) values(15,'Выехал');
+
+create table event_name (id text primary key,value text);
+insert into event_name (id,value) values('moving','Проезд');
+insert into event_name (id,value) values('opening','Открытие');
+
+create table event_dir (id text primary key,value text);
+insert into event_dir (id,value) values('into','Вьезд');
+insert into event_dir (id,value) values('outfrom','Выезд');
+
+create table event_reason (id text primary key,value text);
+insert into event_reason (id,value) values('auto','Автоматический');
+insert into event_reason (id,value) values('manual','Ручной');
+
 alter table events add column card text;
 
 drop view EventsView;
 create view EventsView as select
-	EventName,
+	event_name.value as EventName,
 	DateTime,
 	Terminal.title as Terminal,
-	Direction,
-	Reason,
+	event_dir.value as Direction,
+	event_reason.value as Reason,
 	FreePlaces,
 	Card
 from Events
-left join Terminal on Events.Terminal = Terminal.id
-order by id desc limit 0,150;
+left join Terminal on Events.Terminal = Terminal.terminal_id
+left join event_name on Events.EventName = event_name.id
+left join event_dir on Events.Direction = event_dir.id
+left join event_reason on Events.Reason = event_reason.id
+order by Events.id desc limit 0,150;
 
 drop view PaymentView;
 create view PaymentView as select 
