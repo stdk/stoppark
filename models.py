@@ -54,7 +54,13 @@ class Card(Model):
  Status = IntField(visible=False)
 
  def get_status(self):
-  return {1:'разрешен',2:'утерян',3:'просрочен',4:'запрещен'}.get(self.Status,'unknown')
+  return {
+    1: 'разрешен',
+    2: 'утерян',
+    3: 'просрочен',
+    4: 'запрещен',
+    5: 'выехал',
+    6: 'вьехал' }.get(self.Status,'')
  def set_status(self,value):
   self.Type = value
  VirtualStatus = VirtualField(get_status,set_status)
