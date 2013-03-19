@@ -25,7 +25,7 @@ class LStatus(Model):
 class Card(Model):
  def __init__(self):
   self.Card = 'Card'
-  self.DTReg = strftime('%d-%m-%y') 
+  self.DTReg = strftime('%y-%m-%d') 
   self.Type = 2
   self.Status = 1
 

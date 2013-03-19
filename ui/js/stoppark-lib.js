@@ -111,10 +111,8 @@ function initTable(selector,path,args) {
         //data options allow us to replace value in cell with another value using predefined dictionary
         if('data' in editor) {
           elements.each(function(index,element) {
-            var e = $(element)
-            var value = e.text()
+            var value = $(element).text()
             if(value in editor.data) {
-              //e.text(editor.data[value])
               var aPos = table.fnGetPosition( element )
               table.fnUpdate( editor.data[value], aPos[0], aPos[1] , false)
             }
