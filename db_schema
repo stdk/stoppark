@@ -40,15 +40,16 @@ CREATE TABLE Config (
 	UserStr8 text
 );
 
-CREATE TABLE `Events` (
-	`Event` text not null default "Event",
-	`id` integer primary key,
-	`EventName`  text,
-	`DateTime` text,
-	`Terminal` integer,
-	`Direction` text,
-	`Reason` text,
-	`FreePlaces` integer
+CREATE TABLE Events (
+	Event text not null default "Event",
+	id integer primary key,
+	EventName  text,
+	DateTime text,
+	Terminal integer,
+	Direction text,
+	Reason text,
+	FreePlaces integer,
+	Card text
 );
 
 CREATE TABLE GStatus (
@@ -160,18 +161,6 @@ insert into status(id,value) values(1,'Вьехал');
 insert into status(id,value) values(5,'Оплачен');
 insert into status(id,value) values(15,'Выехал');
 
-create table event_name (id text primary key,value text);
-insert into event_name (id,value) values('moving','Проезд');
-insert into event_name (id,value) values('opening','Открытие');
-
-create table event_dir (id text primary key,value text);
-insert into event_dir (id,value) values('into','Вьезд');
-insert into event_dir (id,value) values('outfrom','Выезд');
-
-create table event_reason (id text primary key,value text);
-insert into event_reason (id,value) values('auto','Автоматический');
-insert into event_reason (id,value) values('manual','Ручной');
-
 create view EventsView as select
 	EventName,
 	DateTime,
@@ -181,8 +170,8 @@ create view EventsView as select
 	FreePlaces,
 	Card
 from Events
-left join Terminal on Events.Terminal = Terminal.id
-order by id desc limit 0,150;
+left join Terminal on Events.Terminal = Terminal.terminal_id
+order by Events.id desc limit 0,150;
 
 create view PaymentView as select 
 	payment_type.value as Payment,
