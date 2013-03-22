@@ -1,6 +1,7 @@
 from viewer import Viewer
 from http import access_level
 from cgi import escape
+from json import dumps
 
 class Editor(Viewer):
  def __init__(self,provider,secure = False):
@@ -45,8 +46,8 @@ class Editor(Viewer):
  @access_level(2)
  def save(self,request):
   try:
-   self.provider.save()
-   return request.ok()
+   aaData = dumps({'aaData': self.provider.save() })
+   return request.ok([request.content_type['html']],aaData)
   except IOError as e: return request.server_error(e)
 
  @access_level(2)

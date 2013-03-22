@@ -59,7 +59,9 @@ class ModelDataProvider(object):
  def save(self):
   [ record.save() for record in self.modified ]
   self.cls.connection.commit()
+  ret = [ record.array(only_visible=True) for record in self.modified ]
   self.load()
+  return ret
  
  def append(self):
   obj = self.cls()
@@ -105,17 +107,21 @@ class MetaModel(type):
   visible_fields = [key for key in all_fields if dict[key].visible]
   create_query = 'create table if not exists %s (%s)' % (name,field_definitions)
   select_query = 'select * from %s' %(name)
-  save_query = 'replace into %s(%s) values(%s)' % (name,','.join(fields),','.join('?' * len(fields)))
+  save_query = '%%s into %s(%s) values(%s)' % (name,','.join(fields),','.join('?' * len(fields)))
   delete_query = 'delete from %s' % (name)
 
-  try: dict['primary_key'] = [key for key in all_fields if hasattr(dict[key],'primary_key')][0]
+  try: 
+    pk_name = [key for key in all_fields if hasattr(dict[key],'primary_key')][0]
+    dict['pk_name'] = pk_name
+    dict['pk'] = property(MetaModel.get_pk,MetaModel.set_pk)
   except IndexError: print 'There is no primary key defined for:',name
 
   dict['fields']         = fields
   dict['visible_fields'] = visible_fields
   dict['create_query']   = create_query
   dict['select_query']   = select_query
-  dict['save_query']     = save_query
+  dict['replace_query']  = save_query % ('replace',)
+  dict['insert_query']   = save_query % ('insert',)
   dict['delete_query']   = delete_query
 
   dict['create']        = classmethod(MetaModel.create)
@@ -138,25 +144,33 @@ class MetaModel(type):
   '''
   obj = super(MetaModel, cls).__call__()
   [ setattr(obj,key,kw.get(key,None)) for key in cls.fields if key not in obj.__dict__ ]
-  #[ obj.__dict__.__setitem__(key,value) for key,value in args ]
   if row: [obj.__dict__.__setitem__(key,row[key]) for key in row.keys()] 
   return obj
 
  @staticmethod
- def array(self,**kw):
-  keys = self.visible_fields if kw.get('only_visible',False) else self.fields
+ def get_pk(self):
+  return getattr(self,self.pk_name)
+
+ @staticmethod
+ def set_pk(self,value):
+  setattr(self,self.pk_name,value)
+
+ @staticmethod
+ def array(self,only_visible = False,**kw):
+  keys = self.visible_fields if only_visible else self.fields
   return [ getattr(self,key) for key in keys ]
 
  @staticmethod
  def save(self):
-  values = self.array()
   cursor = self.connection.cursor()
-  cursor.execute(self.save_query,values)
+  query = self.replace_query if self.pk else self.insert_query
+  cursor.execute(query,self.array())
+  if self.pk == None: self.pk = cursor.lastrowid
 
  @staticmethod
  def delete(self):
   cursor = self.connection.cursor()
-  clause = ' where %s="%s"' % (self.primary_key,getattr(self,self.primary_key))
+  clause = ' where %s="%s"' % (self.pk_name,self.pk)
   query = self.delete_query + clause
   cursor.execute(query)
 
