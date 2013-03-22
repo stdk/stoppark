@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/css/smoothness/jquery-ui-1.8.17.custom.css" >
   <link type="text/css" rel="stylesheet" href="http://${host}/stoppark/ui/datatables/css/demo_table_jui.css" >
-  <title>Stop-Park</title>
+  <title>Stop-Park PRO</title>
 
 <style>
 #tabs {
@@ -42,6 +42,24 @@ table * {
 .user {
   background-color: #FFFF99;
 }
+
+#header {
+  margin-bottom: 5px;
+  background-color: #DDD;
+  text-align: center;
+  font-size: 3em;
+}
+
+#wrap_status {
+  float:right;
+  width: 20%;
+}
+
+#wrap_status td {
+  font-size: 1.6em;
+  text-align: center;
+}
+
 </style>
 
 </head>
@@ -49,42 +67,19 @@ table * {
 
 <div id="userinfo"><span id="userlevel">${level}</span>: ${user} [<a href="http://logout@${host}:2000/auth">Выход</a>]</div>
 
-<div>
-<table id="status" cellpadding="0" cellspacing="0" border="0" class="display" style="margin-bottom: 10px">
+<div id="header">
+Stop-Park PRO
+<div id="wrap_status">
+<table id="status" cellpadding="0" cellspacing="0" border="0" class="display">
   <thead>
    <tr>
-    <th colspan="19" style="background-color: #CCC"><h2>Парковка</h2></th>
-   </tr>
-   <tr>
-    <th colspan="5" style="background-color: #EEE">Въезд</th>
-    <th colspan="5" style="background-color: #DDD">Выезд</th>
-    <th colspan="5" style="background-color: #EEE">Оплачено</th>
-    <th colspan="2" style="background-color: #DDD">Виды оплаты</th>
-    <th colspan="2" style="background-color: #EEE">Места</th>
-   </tr>
-   <tr>
-    <th>∑</th> 
-    <th>Год</th> 
-    <th>Месяц</th> 
-    <th>День</th> 
-    <th>Смена</th> 
-    <th>∑</th> 
-    <th>Год</th> 
-    <th>Месяц</th> 
-    <th>День</th> 
-    <th>Смена</th> 
-    <th>∑</th> 
-    <th>Год</th> 
-    <th>Месяц</th> 
-    <th>День</th> 
-    <th>Смена</th> 
-    <th>Post</th>
-    <th>Single</th>
     <th>Свободно</th>
     <th>Всего</th>
    </tr>
   </thead>
 </table>
+</div>
+<div style="clear:both"></div>
 </div>
 
 <div id="tabs">
