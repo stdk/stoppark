@@ -207,7 +207,10 @@ function initTable(selector,path,args) {
         type: "POST",
         url: path + "/save",
         data: {},
-        success: update,
+        success: function(data,textStatus,jqXHR) {
+          //console.log(data)
+          update()
+        },
         error : function(jqXHR, textStatus, errorThrown) { 
           alert('Невозможно выполнить операцию: ' + errorThrown);
         }
