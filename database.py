@@ -163,7 +163,7 @@ class MetaModel(type):
  @staticmethod
  def save(self):
   cursor = self.connection.cursor()
-  query = self.replace_query if self.pk else self.insert_query
+  query = self.replace_query if self.pk != None else self.insert_query
   cursor.execute(query,self.array())
   if self.pk == None: self.pk = cursor.lastrowid
 
