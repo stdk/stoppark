@@ -25,6 +25,9 @@ function getForeignKeyData(path,args)
 function hideTabByName(name) {
   var tab_idx = $('#tabs ul li').index($('#tabs ul a[href="#' + name + '"]').parent())
   $('#tabs').tabs("disable",tab_idx)
+
+  var tab_idx2 = $('#tab-options ul li').index($('#tabs ul a[href="#' + name + '"]').parent())
+  $('#tab-options').tabs("disable",tab_idx2)
 }
 
 var init = {
@@ -139,6 +142,8 @@ $(document).ready(function() {
   $('#tabs').tabs()
   $('#tab-options').tabs()
 
+  if(!admin) hideTabByName('tab-options')
+
   //allows jEditable to submit select element when its value changes
   $('select').live('change', function() {
    $(this).parent().submit()
@@ -190,6 +195,7 @@ $(document).ready(function() {
   setInterval(function() {
     generic_editors.doUpdate(true)
 
+    if(!admin) tables.cards.fnReloadAjax()
     //update readonly tables 
     tables.gstatus.fnReloadAjax()
     tables.lstatus.fnReloadAjax()
