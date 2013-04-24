@@ -49,7 +49,8 @@ CREATE TABLE Events (
 	Direction text,
 	Reason text,
 	FreePlaces integer,
-	Card text
+	Card text,
+	GosNom text
 );
 
 CREATE TABLE GStatus (
@@ -161,46 +162,49 @@ insert into status(id,value) values(1,'Вьехал');
 insert into status(id,value) values(5,'Оплачен');
 insert into status(id,value) values(15,'Выехал');
 
-create view EventsView as select
+CREATE VIEW EventsView as select
 	EventName,
-	DateTime,
+	'20' || DateTime as DateTime,
 	Terminal.title as Terminal,
 	Direction,
 	Reason,
 	FreePlaces,
-	Card
+	Card,
+	GosNom
 from Events
 left join Terminal on Events.Terminal = Terminal.terminal_id
 order by Events.id desc limit 0,150;
 
-create view PaymentView as select 
+CREATE VIEW PaymentView as select 
 	payment_type.value as Payment,
 	TalonID,
 	Tariff.Name as Type,
 	Kassa,
 	Operator,
-	DTime,
+	'20' || DTime as DTime,
 	status.value as Status,
 	Tarif/100 as Tarif,
-	TarifKol,DTIn,
-	DTOut,Summa / 100 as Summa
+	TarifKol,
+	DTIn,
+	DTOut,
+	Summa / 100 as Summa
 from Payment
 left join status on Payment.Status = status.id
 left join payment_type on payment_type.id = Payment.Payment
 left join Tariff on Tariff.id = Payment.Type
 order by Payment.id desc limit 0,150;
 
-create view TicketView as select
+CREATE VIEW TicketView as select
 	Ticket.id as ID,
 	BAR,
 	Tariff.Name as TypeTarif,
 	PriceTarif/100 as PriceTarif,
 	Summ/100 as Summ,
 	SummDopl/100 as SummDopl,
-	TimeIn,
-	TimeOut,
-	TimeCount,
-	TimeDopl,
+	'20' || TimeIn as TimeIn,
+	'20' || TimeOut as TimeOut,
+	'20' ||TimeCount as TimeCount,
+	'20' || TimeDopl as TimeDopl,
 	status.value as Status
 from Ticket
 left join status on Ticket.Status=status.id
