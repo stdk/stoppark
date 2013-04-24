@@ -23,7 +23,7 @@ class Editor(Viewer):
    value = escape(post['value'].value)
    row = int(post['row'].value)
    col = int(post['col'].value)  
-   self.provider.setattr(row=row,idx=col,value=value) 
+   value = self.provider.setattr(row=row,idx=col,value=value) 
    return request.ok([request.content_type['html']],value)
   except KeyError as e: return request.bad_request(e)
   except ValueError as e: return request.bad_request(e)
