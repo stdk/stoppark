@@ -1,4 +1,4 @@
-from sqlite3 import connect as sqlite3_connect,Row as sqlite3_row
+from sqlite3 import connect as sqlite3_connect,Row as sqlite3_row,OperationalError,ProgrammingError
 from itertools import izip
 
 DATABASE_FILENAME = 'data/db.db3'
@@ -75,8 +75,10 @@ class ModelDataProvider(object):
  
  def setattr(self,row=None,idx=None,value=None):
   if idx:
-   setattr(self.data[row],self.cls.visible_fields[idx],value)
-   self.modified.add(self.data[row])
+   obj,field = self.data[row],self.cls.visible_fields[idx]
+   setattr(obj,field,value)
+   self.modified.add(obj)
+   return getattr(obj,field)
 
 class InvertModelDataProvider(object):
  def __init__(self,cls):
@@ -183,8 +185,15 @@ class MetaModel(type):
  @staticmethod
  def objects_from_query(cls,query,izip=izip):
   cursor = cls.connection.cursor()
-  cursor.execute(query)
-  return [cls(row) for row in cursor]  
+  try:
+   cursor.execute(query)
+   return [cls(row) for row in cursor]  
+  except (ProgrammingError,OperationalError) as e:
+   from traceback import print_exc
+   print '-'*60
+   print 'Executing:',query
+   print_exc()
+   print '-'*60
 
  @staticmethod
  def all(cls):
