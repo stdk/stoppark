@@ -51,7 +51,7 @@ var init = {
     editors[3] = generic.text
     editors[4] = generic.date
     editors[5] = generic.date
-    for(var i=6;i<15;i++) editors[i] = generic.text
+    for(var i=8;i<15;i++) editors[i] = generic.text
     editors[15] = card_status
     editors[16] = generic.tariff    
     var cards = initTable('#cards','/card',$.extend( { editors: editors },arg_base))
@@ -75,7 +75,6 @@ var init = {
                           '1': 'Фиксированный',
                           '2': 'Переменный',
                           '3': 'Разовый',
-                          '4': 'Новый тариф',
                           '5': 'Предоплаченный',
                           '6': 'Абонемент'
                         }, 
@@ -89,7 +88,8 @@ var init = {
       })    
       return result
     } }
-    var tariffEditors = { 2: text, 3: tariff_type, 4: tariff_interval, 5: tariff_cost, 6: generic_editors.time, 7: text, 8: text }
+    var tariffEditors = { 2: text, 3: tariff_type, 4: tariff_interval, 5: tariff_cost, 6: generic_editors.time,
+                          7: text, 8: { width: "200px", height: "8px" } }
     return initTable('#tariffs','/tariff',$.extend( { editors: tariffEditors },arg_base))    
   },
 
@@ -137,6 +137,7 @@ $(document).ready(function() {
   $('#userinfo').addClass({true: 'admin', false: 'user'}[admin])
 
   $('#tabs').tabs()
+  $('#tab-options').tabs()
 
   //allows jEditable to submit select element when its value changes
   $('select').live('change', function() {

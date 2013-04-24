@@ -85,40 +85,14 @@ Stop-Park PRO
 <div id="tabs">
 
 <ul>
-  <li><a href="#tab-boards">Пульты</a></li>
   <li><a href="#tab-events">События</a></li>
   <li><a href="#tab-payment">Платежи</a></li>
   <li><a href="#tab-cards">Карточки</a></li>
   <li><a href="#tab-tickets">Талоны</a></li>
   <li><a href="#tab-tariffs">Тарифы</a></li>
-  <li><a href="#tab-config">Конфигурация</a></li>
-  <li><a href="#tab-user">Пользователи</a></li>
-  <li><a href="#tab-terminals">Терминалы</a></li>
   <li><a href="#tab-reports">Отчёты</a></li>
+  <li><a href="#tab-options">Настройки</a></li>
 </ul>
-
-<div id="tab-boards">
- <table id="boards" cellpadding="0" cellspacing="0" border="0" class="display">
- <thead>
-  <tr>
-   <th>#</th>
-   <th>HKol</th>     
-   <th>HSum</th>     
-   <th>DKol</th>     
-   <th>DSum</th>     
-   <th>MKol</th>     
-   <th>MSum</th>     
-   <th>StKol</th>     
-   <th>StSum</th>     
-   <th>Time</th>     
-   <th>ParkManLast</th>     
-   <th>ParkManCur</th>     
-   <th>PrintedAll</th>     
-   <th>PrintedSmena</th>     
-  </tr>
- </thead>
- </table>
-</div>
 
 <div id="tab-events">
  <table id="events" cellpadding="0" cellspacing="0" border="0" class="display">
@@ -130,7 +104,8 @@ Stop-Park PRO
    <th>Направление</th>     
    <th>Основание</th>     
    <th>Мест</th>
-   <th>Карточка</th>
+   <th>№ карточки</th>
+   <th>Госномер</th>
   </tr>
  </thead>
  </table> 
@@ -168,11 +143,11 @@ Stop-Park PRO
    <th>ID</th>     
    <th style="min-width:45px">От</th>     
    <th style="min-width:45px">До</th>     
-   <th>Въезд</th>     
-   <th>Выезд</th>     
+   <th style="width:45px">Въезд</th>     
+   <th style="width:45px">Выезд</th>     
+   <th>Фамилия</th>  
    <th>Имя</th>     
-   <th>Отчество</th>     
-   <th>Фамилия</th>     
+   <th>Отчество</th>
    <th>Телефон</th>     
    <th>Госномер</th>     
    <th>Марка</th>     
@@ -242,69 +217,104 @@ Stop-Park PRO
 
 </div>
 
-<div id="tab-config">
- <table id="config" cellpadding="0" cellspacing="0" border="0" class="display">
- <thead>
-  <tr>
-   <th style="width:200px">Параметр</th>
-   <th>Значение</th>
- </tr>
- </thead>
-</table> 
-
-<div style="clear:both">
-  <button id="config-save-changes">Подтвердить изменения</button>
-  <button id="config-cancel-changes">Отменить изменения</button>
-</div>
-
-</div>
-
-<div id="tab-user">
- <table id="users" cellpadding="0" cellspacing="0" border="0" class="display">
- <thead>
-  <tr>
-   <th style="width: 50px">#</th>
-   <th>Логин</th>
-   <th>Пароль</th>
-   <th>Уровень доступа</th>
- </tr>
- </thead>
-</table> 
-
-<div style="clear:both">
-  <button id="users-row-add">Добавить пользователя</button>
-  <button id="users-save-changes">Подтвердить изменения</button>
-  <button id="users-cancel-changes">Отменить изменения</button>
-</div>
-
-</div>
-
-<div id="tab-terminals">
- <table id="terminals" cellpadding="0" cellspacing="0" border="0" class="display">
- <thead>
-  <tr>
-   <th style="width: 40px"></th>
-   <th style="width: 70px">№</th>
-   <th>Название</th>     
- </tr>
- </thead>
-</table> 
-
-<div style="clear:both">
-  <button id="terminals-row-add">Добавить терминал</button>
-  <button id="terminals-save-changes">Подтвердить изменения</button>
-  <button id="terminals-cancel-changes">Отменить изменения</button>
-</div>
-
-</div>
-
 <div id="tab-reports" style="padding-left: 20px">
-  <h3><a href="http://${host}/stoppark/data/mid.log">Лог запросов пультов к базе данных</a></h3>
-  <h3><a href="http://${host}/stoppark/data/db.db3">Выгрузить базу данных парковки</a></h3>
-  <div style="border-left:3px solid black; padding-left: 10px;">
-  <h3>Загрузка базы данных парковки:</h3>
-  <iframe style="width:70%;height:60px" scrolling="no" frameborder="0" src="/upload/">error</iframe>
+   <h3><a href="http://${host}/stoppark/data/mid.log">Лог запросов пультов к базе данных</a></h3>
+   <h3><a href="http://${host}/stoppark/data/db.db3">Выгрузить базу данных парковки</a></h3>
+   <div style="border-left:3px solid black; padding-left: 10px;">
+    <h3>Загрузка базы данных парковки:</h3>
+    <iframe style="width:70%;height:60px" scrolling="no" frameborder="0" src="/upload/">error</iframe>
+   </div>
   </div>
+
+
+<div id="tab-options">
+
+  <ul>
+   <li><a href="#tab-boards">Пульты</a></li>
+   <li><a href="#tab-config">Конфигурация</a></li>
+   <li><a href="#tab-user">Пользователи</a></li>
+   <li><a href="#tab-terminals">Терминалы</a></li>
+  </ul>
+
+  <div id="tab-boards">
+   <table id="boards" cellpadding="0" cellspacing="0" border="0" class="display">
+   <thead>
+    <tr>
+     <th>#</th>
+     <th>HKol</th>     
+     <th>HSum</th>     
+     <th>DKol</th>     
+     <th>DSum</th>     
+     <th>MKol</th>     
+     <th>MSum</th>     
+     <th>StKol</th>     
+     <th>StSum</th>     
+     <th>Time</th>     
+     <th>ParkManLast</th>     
+     <th>ParkManCur</th>     
+     <th>PrintedAll</th>     
+     <th>PrintedSmena</th>     
+    </tr>
+   </thead>
+   </table>
+  </div>
+
+  <div id="tab-config">
+  <table id="config" cellpadding="0" cellspacing="0" border="0" class="display">
+   <thead>
+    <tr>
+     <th style="width:200px">Параметр</th>
+     <th>Значение</th>
+   </tr>
+   </thead>
+  </table> 
+
+  <div style="clear:both">
+   <button id="config-save-changes">Подтвердить изменения</button>
+   <button id="config-cancel-changes">Отменить изменения</button>
+  </div>
+
+  </div>
+
+  <div id="tab-terminals">
+  <table id="terminals" cellpadding="0" cellspacing="0" border="0" class="display">
+   <thead>
+    <tr>
+     <th style="width: 40px"></th>
+     <th style="width: 70px">№</th>
+     <th>Название</th>     
+    </tr>
+   </thead>
+  </table> 
+
+  <div style="clear:both">
+   <button id="terminals-row-add">Добавить терминал</button>
+   <button id="terminals-save-changes">Подтвердить изменения</button>
+   <button id="terminals-cancel-changes">Отменить изменения</button>
+  </div>
+
+  </div>
+
+  <div id="tab-user">
+  <table id="users" cellpadding="0" cellspacing="0" border="0" class="display">
+  <thead>
+   <tr>
+    <th style="width: 50px">#</th>
+    <th>Логин</th>
+    <th>Пароль</th>
+    <th>Уровень доступа</th>
+   </tr>
+  </thead>
+  </table> 
+
+  <div style="clear:both">
+   <button id="users-row-add">Добавить пользователя</button>
+   <button id="users-save-changes">Подтвердить изменения</button>
+   <button id="users-cancel-changes">Отменить изменения</button>
+  </div>
+
+  </div>
+  
 </div>
 
 </div>
