@@ -40,13 +40,22 @@ class Card(Model):
  VirtualType = VirtualField(get_type,set_type)
 
  CardID = TextField()
- DTReg = TextField()
- DTEnd = TextField()
+ 
+ DTReg = TextField(visible=False)
+ def getDTReg(self): return '20' + self.DTReg if self.DTReg else None
+ def setDTReg(self,value): self.DTReg = value
+ vDTReg = VirtualField(getDTReg,setDTReg)
+
+ DTEnd = TextField(visible=False)
+ def getDTEnd(self): return '20' + self.DTEnd if self.DTEnd else None
+ def setDTEnd(self,value): self.DTEnd = value
+ vDTEnd = VirtualField(getDTEnd,setDTEnd)
+
  DTIn = TextField()
- DTOut = TextField()
- DriveName = TextField()
- DriveSName = TextField()
+ DTOut = TextField() 
  DriveFam = TextField()
+ DriveName = TextField()
+ DriveSName = TextField() 
  DrivePhone = TextField()
  CarGosNom = TextField()
  CarModel = TextField()
@@ -209,6 +218,8 @@ class Payment(Model):
  DTOut = TextField()
  Summa = IntField()
 
+
+
 class PaymentView(Model):
  Payment = TextField()
  TalonID = TextField()
@@ -236,6 +247,7 @@ class Events(Model):
  Reason = TextField()
  FreePlaces = IntField()
  Card = TextField()
+ GosNom = TextField()
 
 class EventsView(Model):
  EventName = TextField()
@@ -245,6 +257,7 @@ class EventsView(Model):
  Reason = TextField()
  FreePlaces = IntField() 
  Card = TextField()
+ GosNom = TextField()
 
 class Terminal(Model):
  id = IntField(primary_key=True)
