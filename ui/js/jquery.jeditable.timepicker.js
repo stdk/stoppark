@@ -21,7 +21,7 @@ $.editable.addInputType('timepicker', {
         var hourselect = $('<select id="hour_" />');
         var minselect  = $('<select id="min_" />');
         
-        for (var hour=0; hour <= 23; hour++) {
+        for (var hour=0; hour <= 24; hour++) {
             if (hour < 10) {
                 hour = '0' + hour;
             }
@@ -30,7 +30,7 @@ $.editable.addInputType('timepicker', {
         }
         $(this).append(hourselect);
 
-        for (var min=0; min <= 45; min = parseInt(min, 10) + 15) {
+        for (var min=0; min <= 59; min = parseInt(min, 10) + 1) {
             if (min < 10) {
                 min = '0' + min;
             }
