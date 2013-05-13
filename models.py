@@ -25,7 +25,9 @@ class LStatus(Model):
 class Card(Model):
  def __init__(self):
   self.Card = 'Card'
-  self.DTReg = strftime('%y-%m-%d') 
+  self.DTReg = strftime('%y-%m-%d')
+  self.DTIn = '00-00-00 00:00:00' 
+  self.DTOut = '00-00-00 00:00:00' 
   self.Type = 2
   self.Status = 1
 
@@ -36,7 +38,7 @@ class Card(Model):
  def get_type(self):
   return {0:'служебный',1:'разовый',2:'клиент',3:'кассир',4:'админ'}.get(self.Type,'unknown')
  def set_type(self,value):
-  self.Type = value
+  self.Type = int(value)
  VirtualType = VirtualField(get_type,set_type)
 
  CardID = TextField()
@@ -69,9 +71,9 @@ class Card(Model):
     3: 'просрочен',
     4: 'запрещен',
     5: 'выехал',
-    6: 'вьехал' }.get(self.Status,'')
+    6: 'вьехал' }.get(self.Status,'unknown')
  def set_status(self,value):
-  self.Type = value
+  self.Status = int(value)
  VirtualStatus = VirtualField(get_status,set_status)
 
  TarifType = IntField()
@@ -176,7 +178,7 @@ class User(Model):
   return { 1 : 'Пользователь', 2 : 'Администратор' }.get(self.level,'unknown')
  @v_level.setter
  def v_level(self,value):
-  self.level = value
+  self.level = int(value)
 
  def __str__(self):
   return '{0}:{1}:{2}'.format(self.name,self.password,self.level)
@@ -217,8 +219,6 @@ class Payment(Model):
  DTIn = TextField()
  DTOut = TextField()
  Summa = IntField()
-
-
 
 class PaymentView(Model):
  Payment = TextField()
