@@ -26,6 +26,7 @@ class Card(Model):
  def __init__(self):
   self.Card = 'Card'
   self.DTReg = strftime('%y-%m-%d')
+  self.DTEnd = strftime('%y-%m-%d')
   self.DTIn = '00-00-00 00:00:00' 
   self.DTOut = '00-00-00 00:00:00' 
   self.Type = 2
