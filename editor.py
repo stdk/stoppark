@@ -2,6 +2,7 @@ from viewer import Viewer
 from http import access_level
 from cgi import escape
 from json import dumps
+from sqlite3 import IntegrityError
 
 class Editor(Viewer):
  def __init__(self,provider,secure = False):
@@ -49,6 +50,7 @@ class Editor(Viewer):
    aaData = dumps({'aaData': self.provider.save() })
    return request.ok([request.content_type['html']],aaData)
   except IOError as e: return request.server_error(e)
+  except IntegrityError as e: return request.bad_request(e)
 
  @access_level(2)
  def cancel(self,request):
