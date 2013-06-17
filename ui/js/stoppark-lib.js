@@ -212,7 +212,7 @@ function initTable(selector,path,args) {
           update()
         },
         error : function(jqXHR, textStatus, errorThrown) { 
-          alert('Невозможно выполнить операцию: ' + errorThrown);
+          alert('Невозможно выполнить операцию: ' + jqXHR.responseText)
         }
       })
     })
