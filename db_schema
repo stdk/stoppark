@@ -20,6 +20,8 @@ CREATE TABLE Card (
 	TarifSumm integer
 );
 
+CREATE UNIQUE INDEX unique_CardID on Card(CardID);
+
 CREATE TABLE Config (
 	Config text not null default "Config",
 	ID integer primary key,
