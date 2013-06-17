@@ -23,13 +23,13 @@ create table Card (
 );
 
 insert into Card select 
-	Card,ID,
+	Card,NULL,
 	Type,
 	CardID,
 	substr(DTReg,7,2) || substr(DTReg,3,4) || substr(DTReg,1,2),
 	substr(DTEnd,7,2) || substr(DTEnd,3,4) || substr(DTEnd,1,2),
-	"",
-	"",
+	"00-00-00 00:00:00",
+	"00-00-00 00:00:00",
 	DriveName,
 	DriveSName,
 	DriveFam,
@@ -100,10 +100,104 @@ CREATE VIEW TicketView as select
 	SummDopl/100 as SummDopl,
 	'20' || TimeIn as TimeIn,
 	'20' || TimeOut as TimeOut,
-	'20' ||TimeCount as TimeCount,
+	'20' || TimeCount as TimeCount,
 	'20' || TimeDopl as TimeDopl,
 	status.value as Status
 from Ticket
 left join status on Ticket.Status=status.id
 left join Tariff on Ticket.TypeTarif=Tariff.id
 order by Ticket.id desc limit 0,150;
+
+alter table events rename to events_old;
+
+CREATE TABLE `Events` (
+`Event` text not null default "Event",
+`id` integer primary key,
+`EventName`  text,
+`DateTime`  TEXT,
+`Terminal`  INTEGER,
+`Direction`  TEXT,
+`Reason`  TEXT,
+`FreePlaces` integer,
+Card text,
+GosNom text
+);
+
+insert into Events select 
+	Event,
+        id,
+	EventName,
+	substr(DateTime,7,2) || substr(DateTime,3,4) || substr(DateTime,1,2) || substr(DateTime,9,9),
+	Terminal,
+	Direction,
+	Reason,
+	FreePlaces,
+	Card,
+	GosNom
+from events_old;
+
+alter table payment rename to payment_old;
+
+CREATE TABLE Payment (
+id integer primary key,
+Payment text ,
+Type integer ,
+Kassa integer ,
+Operator text ,
+DTime text ,
+TalonID text ,
+Status integer ,
+TarifType integer ,
+Tarif integer ,
+TarifKol integer ,
+DTIn text ,
+DTOut text ,
+Summa integer );
+
+insert into Payment select 
+	id,
+	Payment,
+	Type,
+ 	Kassa,
+	Operator,
+	substr(DTime,7,2) || substr(DTime,3,4) || substr(DTime,1,2) || substr(DTime,9,9),
+	TalonID,
+	Status,
+	TarifType,
+	Tarif,
+	TarifKol,
+	substr(DTIn,7,2) || substr(DTIn,3,4) || substr(DTIn,1,2) || substr(DTIn,9,9),
+	substr(DTOut,7,2) || substr(DTOut,3,4) || substr(DTOut,1,2) || substr(DTOut,9,9),
+	Summa
+from payment_old;
+
+alter table ticket rename to ticket_old;
+
+CREATE TABLE Ticket(
+Ticket text,
+ID integer primary key,
+BAR text,
+TypeTarif integer,
+ PriceTarif integer ,
+Summ integer,
+ SummDopl integer,
+ TimeIn text,
+ TimeOut text,
+ TimeCount text,
+ TimeDopl text,
+ Status integer);
+
+insert into Ticket select 
+	Ticket,
+	ID,
+	BAR,
+	TypeTarif,
+	PriceTarif,
+	Summ,
+	SummDopl,
+	substr(TimeIn,7,2) || substr(TimeIn,3,4) || substr(TimeIn,1,2) || substr(TimeIn,9,9),
+	substr(TimeOut,7,2) || substr(TimeOut,3,4) || substr(TimeOut,1,2) || substr(TimeOut,9,9),
+	substr(TimeCount,7,2) || substr(TimeCount,3,4) || substr(TimeCount,1,2) || substr(TimeCount,9,9),
+	substr(TimeDopl,7,2) || substr(TimeDopl,3,4) || substr(TimeDopl,1,2) || substr(TimeDopl,9,9),
+	Status	
+from ticket_old;
