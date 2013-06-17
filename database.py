@@ -116,6 +116,9 @@ class MetaModel(type):
     pk_name = [key for key in all_fields if hasattr(dict[key],'primary_key')][0]
     dict['pk_name'] = pk_name
     dict['pk'] = property(MetaModel.get_pk,MetaModel.set_pk)
+
+    update_query = 'update %s set %s where %s=?' % (name,','.join('%s = ?' % field for field in fields),pk_name)
+    dict['update_query']   = update_query
   except IndexError: print 'There is no primary key defined for:',name
 
   dict['fields']         = fields
@@ -165,8 +168,8 @@ class MetaModel(type):
  @staticmethod
  def save(self):
   cursor = self.connection.cursor()
-  query = self.replace_query if self.pk != None else self.insert_query
-  cursor.execute(query,self.array())
+  query = self.update_query if self.pk != None else self.insert_query
+  cursor.execute(query,self.array() + [self.pk] if self.pk != None else [])
   if self.pk == None: self.pk = cursor.lastrowid
 
  @staticmethod
