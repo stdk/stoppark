@@ -201,3 +201,12 @@ insert into Ticket select
 	substr(TimeDopl,7,2) || substr(TimeDopl,3,4) || substr(TimeDopl,1,2) || substr(TimeDopl,9,9),
 	Status	
 from ticket_old;
+
+create trigger update_places update of PlaceNum on config
+begin
+	update gstatus set PlaceAll=new.PlaceNum, PlaceFree=PlaceFree + new.placenum - old.placenum;
+end;
+
+create unique index bar on Ticket(bar);
+
+create unique index unique_CardID on Card(CardID);

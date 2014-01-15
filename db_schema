@@ -42,6 +42,14 @@ CREATE TABLE Config (
 	UserStr8 text
 );
 
+insert into config(id, placenum, freetime) values(null, 100, 15);
+
+create trigger update_places update of PlaceNum on config
+begin
+	update gstatus set PlaceAll=new.PlaceNum, PlaceFree=PlaceFree + new.placenum - old.placenum;
+end;
+
+
 CREATE TABLE Events (
 	Event text not null default "Event",
 	id integer primary key,
@@ -79,6 +87,8 @@ CREATE TABLE GStatus (
 	PlaceFree integer,
 	PlaceAll integer
 );
+
+insert into gstatus (id,PlaceFree,PlaceAll) values(null,100,100);
 
 CREATE TABLE LStatus (
 	LStatus text not null default "LStatus",
@@ -146,6 +156,8 @@ CREATE TABLE Ticket (
 	TimeDopl text,
 	Status integer
 );
+
+create unique index bar on Ticket(bar);
 
 CREATE TABLE User (
 	id integer primary key,

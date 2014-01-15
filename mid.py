@@ -62,21 +62,21 @@ class Handler(dispatcher_with_send):
   except Exception as ex:
    logging.error('%s[%s]', ex.__class__.__name__, ex, extra = self.extra)
    self.send('FAIL')
+
  def handle_query(self,query):
   try:
    rows = Model.connection.cursor().execute(query)
    answer = '\n'.join( '|'.join( str(field) for field in row ) for row in rows )
    logging.debug("<-[%s]",answer or 'NONE',extra=self.extra)
-   self.send(answer.decode('utf-8').encode('cp1251')) if answer else self.send('NONE')
+   self.sendall(answer) if answer else self.send('NONE')
    Model.connection.commit()    
   except Exception as ex:
    logging.error('%s[%s]', ex.__class__.__name__, ex, extra = self.extra)
-   self.send('FAIL') 
+   self.send('FAIL')
 
  def handle_read(self):
-  data = self.recv(self.BYTES_TO_RECV)
-  if data:
-   query = data.decode('cp1251').strip()
+  query = self.recv(self.BYTES_TO_RECV)
+  if query:
    logging.debug('->[%s]', query, extra = self.extra)
    if query.startswith(self.COMMAND_PREFIX):
     self.handle_command(query[3:])
